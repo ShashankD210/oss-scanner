@@ -16,4 +16,4 @@ RUN cargo build --workspace --locked --all-targets
 RUN cargo build --release --locked && install -m 0755 target/release/lm-resizer /usr/local/bin/lm-resizer
 
 # Tests rapides pour vérifier l'image, sans faire échouer la construction.
-RUN (cargo test --workspace --locked -- --test-threads=4 || echo "WARNING: cargo test reported failures")
+RUN (cargo test --workspace --locked --no-fail-fast -- --test-threads=4 || echo "WARNING: cargo test reported failures")
