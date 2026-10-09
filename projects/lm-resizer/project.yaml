@@ -1,8 +1,8 @@
 # LM Resizer — proxy de commandes pour agents de code (Claude Code, Codex…), écrit en Rust.
 repo: https://github.com/phuetz/lm-resizer#master
 
-# À REMPLIR PAR PATRICE : adresse PUBLIQUE qui recevra les rapports (de préférence un alias dédié, pas l'adresse personnelle).
-primary_contact: A-REMPLIR@exemple.invalid
+# Contact sécurité : les rapports arrivent ici.
+primary_contact: patrice.huetz+security@gmail.com
 
 homepage: https://github.com/phuetz/lm-resizer
 disabled: false
