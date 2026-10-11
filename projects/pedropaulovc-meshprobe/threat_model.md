@@ -31,6 +31,8 @@ For broader source coverage, run `python -m pytest`; examine skipped tests rathe
 
 This is Linux amd64 only. No native Windows AppContainer/Job Object execution or Windows Blender binary is provided. There is no GPU/CUDA passthrough; hardware-required rendering cannot be claimed from software rendering. Bubblewrap is installed, but Docker's seccomp/user-namespace policy and host AppArmor/cgroup configuration may prevent nested evaluation sandboxes. Installing a package inside the container does not grant or prove those host isolation capabilities; do not disable them merely to make tests pass.
 
+In a non-privileged Docker run, sandbox tests gated only on Bubblewrap's presence may fail with namespace-permission errors instead of skipping. Report those failures as environment limitations; do not deselect sandbox tests or weaken isolation to claim passing scanner coverage.
+
 No `.corpora` datasets are generated or downloaded. Full qualification needs the exact pinned procedural/curated corpora, public source assets, private manifests/data where applicable, a declared agent adapter, and working host isolation; hosted adapters additionally need authorized credentials/network access outside this enrollment. Recorded qualification reports in the checkout do not demonstrate qualification of this image. Neither full release thresholds nor Windows, hardware, cloud, or real-account behavior is claimed.
 
 ## Severity guidance
