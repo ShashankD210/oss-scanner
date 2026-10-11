@@ -14,6 +14,8 @@ The important boundaries are unauthenticated requests to validation/Turnstile, v
 
 The image retains the complete checkout at `/src`, all locked npm dependencies including development tools, Wrangler/Miniflare/workerd, and the Astro build in `dist/`. Node 24 satisfies the locked Astro minimum (22.12) and Wrangler minimum (22). The build downloads self-hosted Google font assets while networking is available; do not rebuild offline assuming that provider can fetch fonts. No `.dev.vars` file or real secrets are supplied. `public/` and `src/assets/` remain available for source audit.
 
+The image uses `NODE_OPTIONS=--dns-result-order=ipv4first` for the locked Cloudflare adapter's build-time prerender server, avoiding the [upstream loopback-address mismatch](https://github.com/withastro/astro/issues/18056): the adapter listens on `localhost` and fetches that hostname, which can otherwise select different IPv6/IPv4 loopback addresses in Docker. This preserves workerd prerendering and every configured route, rather than switching the adapter or disabling prerendering. A container-local user npm configuration approves install scripts only for `esbuild`, `sharp`, and `workerd`; the checked-in lockfile still selects their versions. No project manifest, lockfile, or application source is modified.
+
 There is no existing test script or tracked test suite. These are proposed post-build checks, not claimed executed results:
 
 ```sh
