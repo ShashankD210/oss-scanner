@@ -59,6 +59,117 @@ The bundle can be rebuilt offline with `cd /src && npm run build`: its schema ge
 
 Do not set a real `GITHUB_TOKEN`, invoke the action against a real repository/event, upload/download live artifacts, edit live PRs, or deploy anything. A dummy token does not make a real Octokit transport offline: disable network access. A safe production-bootstrap smoke may use a synthetic event with no pull_request and no PR_NUMBER, so the actual entry point takes its documented skip branch before any API call; this verifies JavaScript bundle loading, not PR capture or native SQLite initialization. SQLite is lazy and must be exercised separately with a real Database constructor, local input and the selected ABI binary. Run bootstrap only against a complete owned temporary copy of the chosen dist tree, then remove the copy: normal bootstrap replaces its target native file, including the shipped Win32 ABI137 target with a Linux ABI127 prebuild on Node22. Never let the smoke overwrite the canonical original snapshot or the source-compiled native file in /src/dist. No source rewrites or transport hooks are required.
 
+### Observed runtime smoke and standalone reproducer
+
+The parent also ran both the rebuilt bundle and preserved original bundle through the actual unchanged production bootstrap in complete owned temporary copies. Both passed the API-free JavaScript skip path and the separate real native SQLite constructor/schema/local-input probe. Observed Node ABI was 127, SQLite was 3.51.1, and the selected native SHA-256 was `10fede42d3f9c81930258a9e6690c36a7be6ad09cd8438245c719b2e1a9d6f56`. Source and preserved snapshot bytes were not modified. This is not a live PR-capture test.
+
+Save this exact tested harness as `/tmp/runtime-smoke.cjs` on the Docker host (not in the repository). Replace `IMAGE` below with the built scanner image name:
+
+```sh
+docker run --rm --network=none -v /tmp/runtime-smoke.cjs:/tmp/runtime-smoke.cjs:ro IMAGE node /tmp/runtime-smoke.cjs /src/dist
+docker run --rm --network=none -v /tmp/runtime-smoke.cjs:/tmp/runtime-smoke.cjs:ro IMAGE node /tmp/runtime-smoke.cjs /opt/codjiflo-action-committed-dist
+```
+
+```javascript
+'use strict';
+
+// Throwaway parent-run harness: mount read-only into the finished image and
+// execute with Docker --network=none. No source rewrites or transport hooks.
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
+const crypto = require('node:crypto');
+const { spawnSync } = require('node:child_process');
+
+assert.equal(process.platform, 'linux', 'production prebuild smoke requires Linux');
+assert.equal(process.versions.modules, '127', 'run in the Node 22 scanner image');
+for (const addresses of Object.values(os.networkInterfaces())) {
+  for (const address of addresses || []) {
+    assert.ok(address.internal, 'network must be disabled, e.g. docker run --network=none');
+  }
+}
+const requestedDist = process.argv[2] || '/src/dist';
+assert.ok(['/src/dist', '/opt/codjiflo-action-committed-dist'].includes(requestedDist), 'unexpected artifact path');
+const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'codjiflo-runtime-smoke-'));
+let db;
+try {
+  // Bootstrap normally overwrites build/Release with its chosen prebuild.
+  // Run an unmodified complete copy, never the auditor's canonical artifacts.
+  const dist = path.join(temporary, 'dist');
+  fs.cpSync(requestedDist, dist, { recursive: true });
+  const eventPath = path.join(temporary, 'event.json');
+  fs.writeFileSync(eventPath, '{}\n');
+  // This exact event has no pull_request and no PR_NUMBER. getCaptureContext
+  // returns null before artifact/file/PR API calls; token is a literal dummy.
+  // Do not inherit any host credentials, event inputs or proxy settings.
+  const child = spawnSync(process.execPath, [path.join(dist, 'bootstrap.js')], {
+    cwd: temporary,
+    env: {
+      PATH: '/usr/local/bin:/usr/bin:/bin',
+      HOME: temporary,
+      GITHUB_ACTIONS: 'true',
+      GITHUB_TOKEN: 'offline-synthetic-token-not-a-credential',
+      GITHUB_EVENT_NAME: 'workflow_dispatch',
+      GITHUB_EVENT_PATH: eventPath,
+      GITHUB_REPOSITORY: 'synthetic/offline',
+      GITHUB_WORKSPACE: temporary,
+      GITHUB_RUN_ID: '1',
+      GITHUB_ACTOR: 'offline-smoke',
+    },
+    encoding: 'utf8',
+    timeout: 30000,
+    maxBuffer: 1024 * 1024,
+  });
+  if (child.error) throw child.error;
+  const output = (child.stdout || '') + (child.stderr || '');
+  process.stdout.write(output);
+  assert.equal(child.status, 0, 'actual production bootstrap failed');
+  assert.match(output, /Not a pull_request event and no PR_NUMBER provided, skipping/);
+  assert.doesNotMatch(output, /::error(?:::|\s)/);
+  assert.ok(!fs.existsSync(path.join(temporary, 'codjiflo-data')), 'skip event unexpectedly captured data');
+
+  const selectedNative = path.join(dist, 'build/Release/better_sqlite3.node');
+  const shippedNative = path.join(dist, 'prebuilds/better_sqlite3-127.node');
+  const digest = file => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+  assert.equal(digest(selectedNative), digest(shippedNative), 'bootstrap did not select the shipped ABI 127 binary');
+
+  // Native SQLite is lazy: the bootstrap's no-PR skip loads the JS bundle but
+  // does not construct a database. This separate constructor exercises the
+  // actual selected binding, source schema and local bytes, without mocks.
+  const Database = require('/src/node_modules/better-sqlite3');
+  db = new Database(path.join(temporary, 'iterations.db'), { nativeBinding: selectedNative });
+  db.pragma('foreign_keys = ON');
+  const schemaVersionSource = fs.readFileSync('/src/src/db/schema.ts', 'utf8');
+  const versionMatch = schemaVersionSource.match(/export const SCHEMA_VERSION\s*=\s*(\d+)\s*;/);
+  assert.ok(versionMatch, 'schema version missing');
+  const schema = fs.readFileSync('/src/src/db/schema.sql', 'utf8').replace('{{SCHEMA_VERSION}}', versionMatch[1]);
+  db.exec(schema);
+  assert.equal(db.prepare("SELECT value FROM schema_meta WHERE key = 'version'").pluck().get(), versionMatch[1]);
+  const content = 'untrusted\u0000unicode-\u2603\n' + 'a'.repeat(65536) + "'; DROP TABLE content_blobs; --";
+  const contentHash = crypto.createHash('sha1').update(content).digest('hex');
+  db.prepare('INSERT INTO content_blobs (content_hash, content, size_bytes) VALUES (?, ?, ?)')
+    .run(contentHash, content, Buffer.byteLength(content));
+  const artifact = db.prepare('INSERT INTO file_artifacts (change_tracking_id) VALUES (?)').run('synthetic-file');
+  const fixturePath = "../../untrusted/'; DROP TABLE file_artifacts; --.ts";
+  db.prepare('INSERT INTO artifact_snapshots (artifact_id, snapshot_index, file_path, content_hash) VALUES (?, ?, ?, ?)')
+    .run(artifact.lastInsertRowid, 0, fixturePath, contentHash);
+  assert.equal(db.prepare('SELECT content FROM content_blobs WHERE content_hash = ?').pluck().get(contentHash), content);
+  assert.equal(db.prepare('SELECT file_path FROM artifact_snapshots WHERE artifact_id = ?').pluck().get(artifact.lastInsertRowid), fixturePath);
+  assert.equal(db.pragma('integrity_check', { simple: true }), 'ok');
+  assert.deepEqual(db.pragma('foreign_key_check'), []);
+  const sqliteVersion = db.prepare('SELECT sqlite_version()').pluck().get();
+  db.close();
+  db = undefined;
+  console.log(JSON.stringify({ result: 'PASS', artifact: requestedDist, executedOwnedCopy: true, nodeAbi: process.versions.modules,
+    selectedNativeSha256: digest(selectedNative), sqliteVersion,
+    scope: 'actual bootstrap/bundle skip path plus real selected native SQLite/schema/local-input smoke; no PR capture or GitHub API test' }));
+} finally {
+  if (db) db.close();
+  fs.rmSync(temporary, { recursive: true, force: true });
+}
+```
+
 ## Severity guidance
 
 Demonstrated token exfiltration, runner arbitrary code execution, or unauthorized sensitive source disclosure across a trust boundary is high severity, potentially critical depending on reach and permissions. Unauthorized PR mutation or forged iteration history that materially undermines review integrity is a significant integrity issue, with severity tied to demonstrated attacker capability. Report attacker-triggered memory/CPU/disk exhaustion with practical input bounds and impact; exhaustion confined to one disposable action run is generally medium. Ordinary line-mapping correctness differences are not automatically security vulnerabilities without concrete review-integrity impact.
