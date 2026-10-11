@@ -1,20 +1,29 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0
+COPY --from=ghcr.io/astral-sh/uv:0.13.0@sha256:cdc6093146eb3ff6a40107b38f008b789e050e77ad87865e381d9917da55a168 /uv /usr/local/bin/uv
 
 ENV DEBIAN_FRONTEND=noninteractive \
     DOTNET_CLI_TELEMETRY_OPTOUT=1 \
     DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1 \
     DOTNET_NOLOGO=1 \
-    NUGET_PACKAGES=/opt/nuget/packages
+    NUGET_PACKAGES=/opt/nuget/packages \
+    UV_CACHE_DIR=/opt/uv/cache \
+    UV_PYTHON_INSTALL_DIR=/opt/uv/python
 
 # Run genuine Microsoft x64 build tools under Wine, never the application/DLL.
 # MinGW lacks shobjidl_core.h; clang-cl /W4 /WX enables additional diagnostics
 # that reject this unchanged MSVC source. Keep the upstream compiler semantics.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      ca-certificates curl git python3 msitools wine64 \
+      ca-certificates curl git msitools wine64 \
     && rm -rf /var/lib/apt/lists/*
 
+# The stdlib-only vendor downloader runs in a uv-managed interpreter/venv, not
+# system Python. Keep the interpreter and uv cache for offline tool use.
+RUN uv venv --managed-python --python 3.12 /opt/msvc-venv
+
 # Download/extract the original vendor packages without header fixes or binary
-# patches. The immutable VS manifest pins every package URL and SHA-256.
+# patches. A fixed-URL manifest pins every package URL and SHA-256.
+# Its body checksum is measured from raw HTTP bytes, not its hexadecimal URL
+# path: Microsoft's channel advertises a different digest/size for this body.
 # --accept-license accepts Microsoft's terms, not the project's MIT license.
 # This image contains non-redistributable SDK/toolchain files: do not publish it.
 RUN mkdir -p /opt/msvc-wine /opt/msvc-cache \
@@ -28,9 +37,10 @@ RUN mkdir -p /opt/msvc-wine /opt/msvc-cache \
       https://download.visualstudio.microsoft.com/download/pr/bc92e2cb-33de-4a0c-995d-efa817f16b16/6e470016e4324c84c255ffd0beb3767d17ec89cc8561e9409ee3e1f6d29400f5/VisualStudio.vsman \
       --output /opt/msvc-wine/VisualStudio.vsman \
     && printf '%s  %s\n' \
-      6e470016e4324c84c255ffd0beb3767d17ec89cc8561e9409ee3e1f6d29400f5 \
+      f0a50ea157222c29abd5ea6ff01bfc3c33b04e011c5e45ee2ca38ef0778e5643 \
       /opt/msvc-wine/VisualStudio.vsman | sha256sum --check - \
-    && python3 /opt/msvc-wine/vsdownload.py \
+    && uv run --no-project --python /opt/msvc-venv/bin/python \
+      /opt/msvc-wine/vsdownload.py \
       --accept-license --major 17 --msvc-version 17.14 --sdk-version 10.0.26100 \
       --manifest /opt/msvc-wine/VisualStudio.vsman \
       --host-arch x64 --architecture x64 \

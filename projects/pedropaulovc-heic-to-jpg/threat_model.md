@@ -89,19 +89,35 @@ build, not in the offline rebuild:
 
 - The existing Microsoft .NET 10 SDK image, WindowsDesktop reference packs, and
   NuGet restore retain their own terms.
-- Ubuntu supplies `wine64`, `python3`, and `msitools` (with its cabinet/MSI
-  dependencies), along with `curl`, CA certificates, and Git. The Wine package's
-  license/copyright notices remain under `/usr/share/doc`.
+- Ubuntu supplies `wine64` and `msitools` (with its cabinet/MSI dependencies),
+  along with `curl`, CA certificates, and Git. The Wine package's license/
+  copyright notices remain under `/usr/share/doc`.
+- The official `uv:0.13.0` binary image is pinned to OCI index SHA-256
+  `cdc6093146eb3ff6a40107b38f008b789e050e77ad87865e381d9917da55a168`.
+  `uv venv --managed-python --python 3.12` downloads a uv-managed CPython runtime
+  and creates `/opt/msvc-venv`; the stdlib-only downloader runs through
+  `uv run --no-project --python /opt/msvc-venv/bin/python`. No system Python or
+  system pip installation is used. uv, CPython, and bundled dependencies retain
+  their own licenses (uv is Apache-2.0 OR MIT; CPython has its Python license).
+  `/opt/uv/python`, `/opt/uv/cache`, and the venv remain available offline.
 - The ISC-licensed `vsdownload.py` from
   [mstorsjo/msvc-wine](https://github.com/mstorsjo/msvc-wine/tree/514f8ea34842cd6d831804d0e9658d3a32870ae1)
   is pinned to commit `514f8ea34842cd6d831804d0e9658d3a32870ae1` and verified
   against SHA-256
   `278429ffd7ec3aa0080ed0438fe241bb73795555949970cc569db68a60cc386b`.
   Its copyright/license remains in `/opt/msvc-wine/vsdownload.py`.
-- An immutable
+- The fixed-URL
   [Microsoft VS 2022 package manifest](https://download.visualstudio.microsoft.com/download/pr/bc92e2cb-33de-4a0c-995d-efa817f16b16/6e470016e4324c84c255ffd0beb3767d17ec89cc8561e9409ee3e1f6d29400f5/VisualStudio.vsman)
-  is verified against SHA-256
-  `6e470016e4324c84c255ffd0beb3767d17ec89cc8561e9409ee3e1f6d29400f5`.
+  is pinned to the measured raw HTTP-body SHA-256
+  `f0a50ea157222c29abd5ea6ff01bfc3c33b04e011c5e45ee2ca38ef0778e5643`
+  (17,954,732 bytes). The Microsoft channel advertises `6e470016...` and
+  30,443,537 bytes for that URL, but those do not match the served body. Direct
+  HTTPS retrieval with a verified Microsoft certificate yielded valid
+  VS `17.14.41` installer JSON without HTTP content encoding. This is an
+  advertised-versus-served-content discrepancy, not evidence that the URL's
+  hexadecimal component uses another digest algorithm. Future body changes
+  fail the checksum check; individual vendor payload hashes are checked
+  independently by the downloader.
   It pins the servicing package URLs and hashes for MSVC 17.14/14.44 and Windows
   SDK `10.0.26100` (installed SDK layout `10.0.26100.0`, compiler layout
   `14.44.35207`). Original Microsoft VSIX/MSI/CAB downloads and notices are kept
