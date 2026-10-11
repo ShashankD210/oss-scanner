@@ -1,0 +1,4 @@
+# ReqogniLoom — AI-native requirements & test management (Django REST + React SPA).
+# Dockerfile and threat_model.md sit beside this file.
+repo: https://github.com/Popoboxxo/ReqogniLoom#main
+primary_contact: duchrow.daniel@gmail.com
