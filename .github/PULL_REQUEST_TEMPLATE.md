@@ -4,6 +4,7 @@ I have verified each of the following before submitting this project:
 
 - [ ] I am a core maintainer of this project.
 - [ ] I accept the [OSS Scanner terms](https://red.anthropic.com/oss-scanner/terms/).
+- [ ] I confirm that I believe my project meets the inclusion criteria and is an established project that users depend on.
 - [ ] `project.yaml` follows the README (one project per PR; `tools/validate.py` passes locally).
 - [ ] `tools/check <name>` builds the project, and its tests run in the shell that follows.
 - [ ] `primary_contact` must be the email address of the primary security contact.
