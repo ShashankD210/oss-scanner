@@ -1,0 +1,21 @@
+# REQUIRED. The ONE git repository to scan, as an https:// URL. Optionally add #branch or #tag to pin one.
+repo: https://github.com/stSoftwareAU/NEAT-AI-Discovery#Develop
+
+# REQUIRED. Who should we email our reports to, and use as the primary contact for questions.
+primary_contact: security@stsoftware.com.au
+
+# Optional. Additional email addresses we will CC on disclosure reports.
+auto_ccs:
+  - maintainer@stsoftware.com.au
+
+# Optional. The project's home page.
+homepage: https://github.com/stSoftwareAU/NEAT-AI-Discovery
+
+# Optional. true pauses reports without removing the enrolment; false (or omitting it) enables your project.
+disabled: false
+
+# REQUIRED: the Dockerfile lives in the project's repository.
+dockerfile: .oss-scanner/Dockerfile
+
+# Optional, but strongly recommended: the threat model lives in the project's repository.
+threat_model: .oss-scanner/threat_model.md
