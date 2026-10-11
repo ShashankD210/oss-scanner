@@ -1,0 +1,30 @@
+# Enrolment of Nothing But Data (NBD) in Anthropic's OSS Scanner.
+# Goes to anthropics/oss-scanner as projects/nbd/project.yaml (one project per pull request).
+# NOTE: every e-mail address in this file is PUBLIC.
+
+# REQUIRED. The repository that is cloned and scanned (#branch pins a branch or tag).
+repo: https://github.com/PetitPrinc3/nbd#main
+
+# REQUIRED. Receives all reports and build-failure notices. Same address as the one
+# published in SECURITY.md of the project; replace it with a dedicated alias if you prefer.
+primary_contact: gavrochebackups@gmail.com
+
+# Optional. Extra addresses CC'd on every report. Cannot be combined with `pgp`.
+# auto_ccs:
+#   - maintainer@example.org
+
+homepage: https://github.com/PetitPrinc3/nbd
+
+# Reports are model-generated, describe UNPATCHED vulnerabilities and travel by e-mail:
+# encrypting them is strongly recommended. Paste your whole armored public key below
+# (reports then go to primary_contact only, so keep auto_ccs commented out).
+# pgp: |
+#   -----BEGIN PGP PUBLIC KEY BLOCK-----
+#   ...
+#   -----END PGP PUBLIC KEY BLOCK-----
+
+disabled: false
+
+# No `dockerfile:` and no `threat_model:` key on purpose: projects/nbd/Dockerfile and
+# projects/nbd/threat_model.md sit next to this file in anthropics/oss-scanner, so the
+# NBD repository does not need any change.
