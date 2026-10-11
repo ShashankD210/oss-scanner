@@ -1,8 +1,8 @@
 # OSS Scanner
 
-This preparation branch contains Wenjun's eight selected enrollment drafts.
-See [ENROLLMENT.md](ENROLLMENT.md) for verification results and remaining
-submission requirements. Anthropic's upstream instructions follow below.
+This preparation branch contains Wenjun's eight submitted enrollment configurations.
+See [ENROLLMENT.md](ENROLLMENT.md) for PR links, verification results and review
+status. Anthropic's upstream instructions follow below.
 
 OSS Scanner is a service by Anthropic to scan critical open-source repositories for security vulnerabilities. Learn more about the service at [red.anthropic.com/oss-scanner](https://red.anthropic.com/oss-scanner).
 

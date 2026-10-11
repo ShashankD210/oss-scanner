@@ -1,89 +1,98 @@
 # Wenjun's OSS Scanner enrollment
 
-Eight repositories selected by the maintainer are prepared under `projects/`.
-Their public security contact is **wenjunfoto@gmail.com**. Each directory contains
-only `project.yaml`, `Dockerfile`, and `threat_model.md`, as required by upstream.
-The Dockerfiles and threat models live here so enrollment does not require
-changing the source repositories.
+All eight selected repositories were submitted to Anthropic on October 10, 2026,
+using **wenjunfoto@gmail.com** as the public security contact. The enrollment PRs
+are open and awaiting Anthropic's manual review; no project acceptance or active
+scan is confirmed. This repository configures the hosted service and does not
+contain the scanner engine.
 
-This repository configures Anthropic's hosted service. It does not contain the
-scanner engine. Preparing a configuration, passing a build, or opening a PR does
-not mean that a project has been accepted or scanned.
+The maintainer accepted the service terms, affirmed the inclusion criteria, and
+authorized the one-time [CLA signature](https://github.com/anthropics/oss-scanner/pull/393#issuecomment-6104855478).
+All eight PRs have passing CLA, terms and automated triage workflow checks.
+Automated triage flags limited public adoption/criticality signals; passing
+checks do not guarantee eligibility or acceptance.
 
-| Repository | Enrollment directory | Environment and review notes |
-| --- | --- | --- |
-| [ai-media-tools](https://github.com/wenjunii/ai-media-tools) | `projects/wenjunii-ai-media-tools` | Python collector and Node browser-search tests; live discovery, email and publication excluded. |
-| [hometown-xr](https://github.com/wenjunii/hometown-xr) | `projects/wenjunii-hometown-xr` | CPU Python dependencies and synthetic archive tests; GPU/model weights and live crawling excluded. Dependency security review policy expired on 2026-08-31 and was not renewed. |
-| [td-imagefx-library](https://github.com/wenjunii/td-imagefx-library) | `projects/wenjunii-td-imagefx-library` | Portable package, archive and updater tests; proprietary TouchDesigner rendering excluded. |
-| [voice-to-visual-sdtd](https://github.com/wenjunii/voice-to-visual-sdtd) | `projects/wenjunii-voice-to-visual-sdtd` | Lightweight CI profile. Main is blocked by a Windows-only import; [draft compatibility PR #24](https://github.com/wenjunii/voice-to-visual-sdtd/pull/24) enables Linux checks. |
-| [wenjun](https://github.com/wenjunii/wenjun) | `projects/wenjunii-wenjun` | Node 24, locked dependencies, tests and production build. **Hold: no repository license detected.** |
-| [flexgpu-touchdesigner](https://github.com/wenjunii/flexgpu-touchdesigner) | `projects/wenjunii-flexgpu-touchdesigner` | Main needs [draft compatibility PR #22](https://github.com/wenjunii/flexgpu-touchdesigner/pull/22). Windows release gate, GPUs, licensed components and live hardware remain outside the Linux image. |
-| [Lifeography](https://github.com/wenjunii/Lifeography) | `projects/wenjunii-lifeography` | Static site, browser tools and external script/style cache; HTTP smoke check, no existing full browser test suite. |
-| [home-podcast](https://github.com/wenjunii/home-podcast) | `projects/wenjunii-home-podcast` | Portable Python tests and FFmpeg; paid generation, production ingestion and show controls excluded. |
+## Submitted projects and verification
 
-## Verification
+Each project passes the upstream schema validator and full `tools/check` build.
+The results below are from the finished Linux amd64 images with Docker networking
+disabled, using the recorded source commits on `main`.
 
-All eight enrollment configurations pass the upstream schema validator:
+| Repository | Enrollment PR | Tested main commit | Offline verification |
+| --- | --- | --- | --- |
+| [ai-media-tools](https://github.com/wenjunii/ai-media-tools) | [#393](https://github.com/anthropics/oss-scanner/pull/393) | [`f3a531e`](https://github.com/wenjunii/ai-media-tools/commit/f3a531e4a2de84f36d0a381e38b859d826bd5311) | 182 Python tests, Node library suite and archive verification. |
+| [hometown-xr](https://github.com/wenjunii/hometown-xr) | [#394](https://github.com/anthropics/oss-scanner/pull/394) | [`93ef094`](https://github.com/wenjunii/hometown-xr/commit/93ef0947dd462d209ce020ac020bf799e0553960) | 197 tests and CLI help. Dependency-policy review remains overdue. |
+| [td-imagefx-library](https://github.com/wenjunii/td-imagefx-library) | [#395](https://github.com/anthropics/oss-scanner/pull/395) | [`5b9211f`](https://github.com/wenjunii/td-imagefx-library/commit/5b9211f1a9af6c62b548614a5fd5d006ad33f3e3) | 353 tests and repository verification. |
+| [voice-to-visual-sdtd](https://github.com/wenjunii/voice-to-visual-sdtd) | [#398](https://github.com/anthropics/oss-scanner/pull/398) | [`713b7a3`](https://github.com/wenjunii/voice-to-visual-sdtd/commit/713b7a353751d731628167e01511f823ebd41c20) | 243 tests; Linux and Windows CI passed. |
+| [wenjun](https://github.com/wenjunii/wenjun) | [#400](https://github.com/anthropics/oss-scanner/pull/400) | [`0a61707`](https://github.com/wenjunii/wenjun/commit/0a617071967a41050711fec8b7e8c8d95274061b) | Content/image checks, 9 Node tests and Vite production build; website CI and audit passed. |
+| [flexgpu-touchdesigner](https://github.com/wenjunii/flexgpu-touchdesigner) | [#399](https://github.com/anthropics/oss-scanner/pull/399) | [`18b7706`](https://github.com/wenjunii/flexgpu-touchdesigner/commit/18b7706f1567a6f76c3838d8bcae0b82b409d66f) | 471 tests run, 6 expected skips; Linux and Windows CI passed. |
+| [Lifeography](https://github.com/wenjunii/Lifeography) | [#396](https://github.com/anthropics/oss-scanner/pull/396) | [`b98a2d3`](https://github.com/wenjunii/Lifeography/commit/b98a2d3b02c1ef87aba0fa7414fdbfd0857778cd) | 20 cached script/style resources and offline HTTP smoke check; full browser behavior unverified. |
+| [home-podcast](https://github.com/wenjunii/home-podcast) | [#397](https://github.com/anthropics/oss-scanner/pull/397) | [`2b2d876`](https://github.com/wenjunii/home-podcast/commit/2b2d87684b9f0670092f4f2908a49251e1cb9fa7) | 133 tests; FFmpeg included. |
 
-```sh
-python3 tools/validate.py
-```
+The configurations point to `#main`; the tested commits above identify this
+verification snapshot. Each enrollment PR adds only `project.yaml`, `Dockerfile`
+and `threat_model.md` in its own `projects/wenjunii-<name>/` directory.
 
-The local receipts
-in `.local/verification/` record source commit, configuration hashes, image ID,
-exit codes and timestamps. Logs are in `.local/logs/`. Those files are ignored by
-Git and must not be included in enrollment pull requests.
+## Source changes and coverage limits
 
-Verified with Linux amd64 Docker images on October 10, 2026:
+- [Voice PR #24](https://github.com/wenjunii/voice-to-visual-sdtd/pull/24) is merged:
+  Windows keyboard polling is optional on headless Linux hosts.
+- [FlexGPU PR #22](https://github.com/wenjunii/flexgpu-touchdesigner/pull/22) is
+  merged: Linux child-process liveness handles zombies and exit races. One local
+  offline attempt hit a Rosetta emulator assertion; the same image passed on
+  retry. Native Linux and Windows CI also passed.
+- [Wenjun PR #6](https://github.com/wenjunii/wenjun/pull/6) is merged: the requested MIT license was added, and the sole affected lockfile dependency,
+  `source-map-js`, was updated from 1.2.1 to 1.2.2 to resolve the website audit
+  failure. GitHub detects the repository's MIT license.
+- Hometown's dependency-security review policy expired on **2026-08-31**. The
+  policy was not renewed or represented as passing; it remains a separate
+  security-review item. Its source and synthetic tests can be built for auditing.
+- Lifeography has no existing browser test suite. Cached scripts/styles and an
+  offline HTTP smoke check do not establish full browser or external-API behavior.
+- Validation did not use credentials, private model weights, paid generation,
+  production ingestion, live email/publication, GPUs or licensed creative
+  applications. Synthetic tests are not live TouchDesigner/audio/hardware tests.
 
-| Project | Source checked | Offline verification |
-| --- | --- | --- |
-| ai-media-tools | [`f3a531e`](https://github.com/wenjunii/ai-media-tools/commit/f3a531e4a2de84f36d0a381e38b859d826bd5311) (`main`) | Passed: 182 Python tests, Node library tests and archive verification. |
-| td-imagefx-library | [`5b9211f`](https://github.com/wenjunii/td-imagefx-library/commit/5b9211f1a9af6c62b548614a5fd5d006ad33f3e3) (`main`) | Passed: 353 tests plus repository verification. |
-| home-podcast | [`2b2d876`](https://github.com/wenjunii/home-podcast/commit/2b2d87684b9f0670092f4f2908a49251e1cb9fa7) (`main`) | Passed: 133 tests. |
-| wenjun | [`8f7e25a`](https://github.com/wenjunii/wenjun/commit/8f7e25a76f8bb8f159efec83e575d72f537fd318) (`main`) | Passed: content/image checks, Node tests and Vite production build. License decision still required. |
-| Lifeography | [`b98a2d3`](https://github.com/wenjunii/Lifeography/commit/b98a2d3b02c1ef87aba0fa7414fdbfd0857778cd) (`main`) | Passed: upstream build, 20 cached script/style resources and offline HTTP smoke check. Full browser behavior is unverified. |
-| hometown-xr | [`93ef094`](https://github.com/wenjunii/hometown-xr/commit/93ef0947dd462d209ce020ac020bf799e0553960) (`main`) | Passed: upstream build and 197 tests offline. Dependency-policy review is separately overdue. |
-| voice-to-visual-sdtd | PR #24, `80818c8` | Passed: upstream build and 243 tests offline. GitHub Windows/Ubuntu CI also passed. Main remains blocked until the fix is merged. |
-| flexgpu-touchdesigner | PR #22, `83c96d4` | Passed: upstream build and offline suite (471 tests run, 6 expected skips). GitHub Windows/Ubuntu CI also passed. Main remains blocked until the fix is merged. |
+Successful builds and tests are not vulnerability scans or a security verdict.
 
-Candidate receipts are stored in `.local/candidate-verification/`, separately
-from the main-branch receipts. Source commits were read from the finished images'
-Git metadata, and configuration hashes match the published enrollment branches.
-Six projects pass on `main`; the other two pass on their compatibility branches.
-No scan or vulnerability verdict is claimed.
+## Reproducing the local checks
 
-The current Mac has a project-local ARM64 Docker CLI, Buildx, Lima and Colima
-under `.local/toolchain/`; downloaded release hashes are recorded in
-`.local/toolchain-manifest.json`. The named `oss-scanner` Colima VM uses 4 CPUs,
-8 GiB RAM, no host directory mounts, and Rosetta for Linux amd64 builds. It has no
-automatic startup configured and is stopped after verification. The runtime is under `~/.colima/`; the Docker
-configuration is local to this checkout. No GitHub or provider credentials are
-passed into build or test containers.
+Local receipts under `.local/verification/` record source commits read from image
+Git metadata, configuration hashes, image IDs, exit codes and timestamps. Logs
+are in `.local/logs/`; earlier attempts and candidate-branch results are preserved
+separately. These files are ignored by Git and are not in the enrollment PRs.
 
-For this prepared checkout:
+The Mac uses project-local ARM64 Docker CLI, Buildx, Lima and Colima binaries in
+`.local/toolchain/`, with release hashes recorded in `.local/toolchain-manifest.json`.
+The `oss-scanner` Colima VM uses 4 CPUs, 8 GiB RAM, no host-directory mounts and
+Rosetta for amd64 builds. It has no automatic startup configured and is stopped
+after verification. Its runtime is under `~/.colima/`; Docker configuration stays
+local to this checkout. No GitHub or provider credentials enter the containers.
 
 ```sh
 source .local/env.sh
 colima start oss-scanner --activate=false --ssh-config=false --mount none
+python3 .local/run_checks.py td-imagefx-library
+colima stop oss-scanner
+```
+
+The local helper runs only explicitly named projects. On another machine, install
+Git, Python with PyYAML, and a working Docker runtime, then use the upstream tools:
+
+```sh
+python3 tools/validate.py
 python3 tools/check --no-shell wenjunii-td-imagefx-library
 docker run --rm --network none --workdir /src \
   oss-scanner-check/built:wenjunii-td-imagefx-library \
   python -m unittest discover -v
-colima stop oss-scanner
 ```
 
-The local helper `.local/run_checks.py` accepts one or more repository names and
-performs the upstream build followed by the documented offline checks. It does
-not submit enrollments, publish code, or send email. On another machine, install
-Git, Python with PyYAML, and a working Docker runtime before using `tools/check`.
+## Enrollment branches and next step
 
-## Submission requirements
+Anthropic requires one project per PR. The preparation branch contains all eight;
+the individual fork branches below each add only their own three project files.
 
-Upstream requires **one project per PR**. The preparation branch contains all
-eight; the following published branches each contain only their own three files:
-
-| Project | Prepared enrollment branch |
+| Project | Enrollment branch |
 | --- | --- |
 | ai-media-tools | [enroll/wenjunii-ai-media-tools](https://github.com/wenjunii/oss-scanner/tree/enroll/wenjunii-ai-media-tools) |
 | hometown-xr | [enroll/wenjunii-hometown-xr](https://github.com/wenjunii/oss-scanner/tree/enroll/wenjunii-hometown-xr) |
@@ -94,32 +103,9 @@ eight; the following published branches each contain only their own three files:
 | Lifeography | [enroll/wenjunii-lifeography](https://github.com/wenjunii/oss-scanner/tree/enroll/wenjunii-lifeography) |
 | home-podcast | [enroll/wenjunii-home-podcast](https://github.com/wenjunii/oss-scanner/tree/enroll/wenjunii-home-podcast) |
 
-The local descriptions under `.local/pr-drafts/` preserve the upstream checklist.
-
-Before an enrollment is submitted:
-
-1. The maintainer must accept the [OSS Scanner terms](https://red.anthropic.com/oss-scanner/terms/).
-2. The maintainer must confirm the inclusion criterion: an established project
-   that users depend on, with impact on infrastructure or user security. A public
-   repository or a passing Docker build is not evidence of eligibility. These
-   drafts do not claim independently verified adoption.
-3. `wenjun` needs an open-source license decision; no license was added or assumed.
-4. The Docker build and appropriate offline checks must pass, with coverage
-   limits disclosed. Static serving is not a full browser test, and mocked
-   hardware tests are not end-to-end integration tests.
-5. The voice and FlexGPU compatibility changes must be reviewed and merged before
-   their `#main` enrollments are submitted. Candidate-branch validation is stored
-   separately and does not imply that the current main branches pass.
-
-Hometown's overdue dependency policy remains a separate security-review item.
-Its source/tests can be built for auditing without renewing that exception or
-changing the declared model dependencies. No security-safety verdict is implied
-by successful container verification.
-
-Anthropic manually reviews eligibility and maintainer status. Its first-PR bot
-may also request the [Contributor License Agreement](CLA.md); the maintainer must
-handle that attestation. The terms and inclusion boxes remain unchecked until
-confirmed. No enrollment PR has been submitted and no scan is active.
+Anthropic must decide whether to accept each project. Service cadence and scan
+execution are controlled by Anthropic, not by these configurations. No local
+scheduler or self-hosted scanning service was created.
 
 See the upstream [README](README.md), [contribution instructions](CONTRIBUTING.md),
-and [service FAQ](https://red.anthropic.com/oss-scanner/) for the current process.
+and [service FAQ](https://red.anthropic.com/oss-scanner/) for the process.
