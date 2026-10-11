@@ -1,5 +1,5 @@
 repo: https://github.com/code-acrobat/kubernetes-mcp-proxy#main
-primary_contact: code-acrobat@users.noreply.github.com
+primary_contact: joerg.meltzer@tngtech.com
 homepage: https://github.com/code-acrobat/kubernetes-mcp-proxy
 dockerfile: .oss-scanner/Dockerfile
 threat_model: THREAT-MODEL.md
