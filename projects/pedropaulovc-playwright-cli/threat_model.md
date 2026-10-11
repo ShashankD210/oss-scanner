@@ -26,6 +26,8 @@ The important trust boundaries are:
 
 The Dockerfile retains the full checkout at `/src`. The committed lockfile still names upstream `@playwright/cli` and upstream `1.59.0-alpha-*` dependencies, contradicting the current fork manifest. Therefore the image uses `npm install --include=dev --package-lock=false` to install the actual declared fork graph without rewriting the source lockfile; it does not run `npm ci` against that stale lock. The pinned fork runtime/test aliases remain version `1.59.0-next.9`; other declared ranges resolve online at image build time. This repository has a plain-JavaScript launcher and no `build`/TypeScript compilation script: its actual compiled runtime is supplied by the declared, aliased npm dependencies. Do not substitute the upstream CLI or invent a separate build step. During the online image build, the installed fork runtime provisions Chromium, Firefox, WebKit, and the Chrome channel, together with system libraries. Bundled browser binaries live in `/ms-playwright`; the Chrome channel is installed system-wide. Both remain available when HOME changes and execution has no Internet access.
 
+The first real scanner build exposed a second published-packaging gap: `@pedropaulovc/playwright@1.59.0-next.9` declares a dependency named `@pedropaulovc/playwright-core`, while its compiled `lib/program.js` still requires the bare module `playwright-core/lib/cli/program` (and other `playwright-core/*` paths). The build therefore failed with `MODULE_NOT_FOUND`. The matching published `@pedropaulovc/playwright-core@1.59.0-next.9` tarball contains the real compiled module and exports `./lib/cli/program`. The Dockerfile installs that exact genuine package as the normal npm alias `playwright-core@npm:@pedropaulovc/playwright-core@1.59.0-next.9` using `--no-save --package-lock=false`. This supplies the imported dependency name without fake packages, hand-written shims, upstream substitution, or rewriting the target's manifests/compiled code. Both runtime and core identify the same source gitHead `bc127eedef283e2503c6710082b2cee3acf5d2c9`. Metadata: [fork runtime](https://registry.npmjs.org/@pedropaulovc%2fplaywright/1.59.0-next.9), [fork core](https://registry.npmjs.org/@pedropaulovc%2fplaywright-core/1.59.0-next.9).
+
 Do not use `npx` without `--no-install`, `install-browser`, package downloads, or other online setup during scanning. Invoke `/src/playwright-cli.js` or the installed `/usr/local/bin/playwright-cli` wrapper. No real authentication tokens, extension secrets, account cookies, browser profiles, or remote CDP endpoints are installed in the image.
 
 ## How to exercise it
@@ -41,8 +43,10 @@ The existing test opens a synthetic `data:` URL with a disposable persistent ses
 
 For a second smoke, run the following **inside an isolated disposable container with networking disabled**, for example a shell opened by `tools/check pedropaulovc-playwright-cli`. It binds only loopback and interacts with a local synthetic page. The scanner runs as root; this synthetic-only configuration explicitly disables Chromium's inner sandbox to accommodate that environment. The outer container/VM sandbox and disabled network remain required. This is not a safe configuration for visiting hostile or authenticated live sites. If testing hostile content, use a non-root browser process with its sandbox enabled and an appropriate container user-namespace/seccomp policy instead.
 
+Use the retained Xvfb display for this fork's headed smoke: the launcher command is explicitly `open --headed`, and the configuration sets `headless:false`. This follows the actual CLI launch requirement rather than treating an assumed headless launch as proof the image works. The display and browser stay inside the disposable container; no production browser/profile is attached.
+
 ```bash
-bash <<'SH'
+xvfb-run -a -s '-screen 0 1280x720x24' bash <<'SH'
 set -euo pipefail
 work=$(mktemp -d /tmp/oss-playwright-cli.XXXXXX)
 server_pid=
@@ -59,7 +63,7 @@ export PLAYWRIGHT_DAEMON_SESSION_DIR="$work/daemon"
 export PLAYWRIGHT_DAEMON_SOCKETS_DIR="$work/sockets"
 cd "$work"
 cat > browser.json <<'JSON'
-{"browser":{"browserName":"chromium","isolated":true,"launchOptions":{"channel":"chromium","headless":true,"chromiumSandbox":false}}}
+{"browser":{"browserName":"chromium","isolated":true,"launchOptions":{"channel":"chromium","headless":false,"chromiumSandbox":false}}}
 JSON
 node <<'NODE' &
 const http = require('node:http');
@@ -92,7 +96,7 @@ node <<'NODE'
 })().catch(error => { console.error(error); process.exit(1); });
 NODE
 cli() { node /src/playwright-cli.js --config="$work/browser.json" -s=oss-smoke "$@"; }
-cli open http://127.0.0.1:18889/
+cli open http://127.0.0.1:18889/ --headed
 cli snapshot
 cli fill '#name' Scanner
 cli click '#submit'
