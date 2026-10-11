@@ -2,7 +2,7 @@
 
 ## Source and dependency provenance
 
-This enrollment targets https://github.com/vezzadev/codjiflo-action. Preparation inspected standalone main `84bf319db970e820224347f6a4784400159696c1`, rather than the stale local checkout. That source has a root `package-lock.json`. The README declares MIT; the owner-authorized root MIT LICENSE is supplied through the separate source licensing change (PR #1), with `Copyright (c) 2026 Pedro Paulo Vezza Campos`. All three commits in the inspected history are attributed to that author. The scanner enrollment does not change source behavior or the licensing branch.
+This enrollment targets https://github.com/vezzadev/codjiflo-action. Preparation inspected standalone main `84bf319db970e820224347f6a4784400159696c1`, rather than the stale local checkout. The root `package-lock.json` is committed. Owner-authorized PR #1 has merged a root MIT LICENSE with `Copyright (c) 2026 Pedro Paulo Vezza Campos`; the source main revision after that licensing change is `2b9d7f4`. The scanner enrollment does not change source behavior.
 
 The action is a flattened package at `/src`, but its unmodified build expects `../packages/diff-engine` and `../scripts/generate-schema.cjs`. The Dockerfile fetches public upstream `vezzadev/codjiflo` at immutable commit `0ef8bebd1f336accb171e9c7b79af3bea46227e9` online, retaining the action checkout as the sole `/src` source. This is a compatible dependency pin, not a claimed historical SHA of the standalone mirror's original sync. The pinned engine manifest is v1.0.0 and matches the local-link dependency contract in the action lockfile. The standalone sync commit does not identify its original monorepo SHA.
 
@@ -16,7 +16,7 @@ The action consumes a repository GitHub token, PR event context or `PR_NUMBER`, 
 
 `src/index.ts:50-61,86-109,141-160` writes `codjiflo-data/iterations.db` under `GITHUB_WORKSPACE` (or the current directory), reads a previous artifact's ZIP entry `iterations.db`, and emits artifact-name/work-directory outputs. Despite the action step's name and output wording, the implementation does not upload an artifact: upload and comment updates are delegated to a consuming workflow. No such workflow is supplied in this checkout. The integration boundary with a caller's artifact upload is relevant, but an upload implementation must not be invented.
 
-The metadata's composite step (`action.yml:29-43`) invokes `dist/bootstrap.js`. Current main contains no committed `dist/`, and its ncc build script emits `dist/index.js`, not a bootstrap script. This is an existing deployment/metadata discrepancy. The audit Dockerfile builds the source package for analysis and unit testing; it does not repair or fabricate the production bootstrap. Do not invoke the production metadata as an offline smoke test or assume that it works unchanged on GitHub runners.
+The composite step (`action.yml:29-43`) invokes the committed `dist/bootstrap.js`. The repository ships `dist/index.js`, worker and license files, and genuine better-sqlite3 prebuilds for Node 20/22/24 (ABIs 115/127/137). The bootstrap selects the runner ABI, copies its prebuild into `dist/build/Release/better_sqlite3.node`, and loads the bundle. The Dockerfile preserves the complete shipped `dist/` at `/opt/codjiflo-action-committed-dist` before ncc regenerates `/src/dist/index.js`, so both the source-built bundle and original shipped artifacts remain available for offline audit. Node 22 selects ABI 127.
 
 ## Assets and trust boundaries
 
@@ -34,7 +34,7 @@ Prioritize `src/capture/`, `src/artifact/`, `src/comment/`, `src/db/`, `src/span
 
 ## Offline exercise guidance
 
-No builds, tests or typechecks were executed during preparation. All source/dependency downloads happen during the Docker build. The image uses Node 22, Python 3, make and g++ for node-gyp/better-sqlite3; native builds use the Node headers included in the image and retain debug information/frame pointers. The action is installed and bundled under `/src`, with node_modules and pinned helper dependencies retained for offline tests.
+The parent reports the scanner build, offline typecheck, all 60 unit tests and ncc rebuild passed. No author-run verification is claimed. All source/dependency downloads happen during the Docker build. The image uses Node 22, Python 3, make and g++ for node-gyp/better-sqlite3; source-native builds use installed Node headers and retain debug information/frame pointers. The action is installed and bundled under `/src`, with node_modules and pinned helper dependencies retained for offline tests. The original shipped bundle/native binaries are retained under `/opt/codjiflo-action-committed-dist`.
 
 In a network-disabled container, with no live GitHub credentials, run the actual non-watching package commands:
 
@@ -57,10 +57,10 @@ Artifact/comment tests mock Octokit responses. Database tests use temporary loca
 
 The bundle can be rebuilt offline with `cd /src && npm run build`: its schema generator, ncc and all dependencies are already installed. Do not reinstall dependencies after network isolation.
 
-Do not set a real `GITHUB_TOKEN`, invoke the action entry point against a repository, upload/download live artifacts, edit live PRs, or deploy anything. A dummy token does not make a real Octokit transport offline: use unit-test mocks/local fixtures and disable network access.
+Do not set a real `GITHUB_TOKEN`, invoke the action against a real repository/event, upload/download live artifacts, edit live PRs, or deploy anything. A dummy token does not make a real Octokit transport offline: disable network access. A safe production-bootstrap smoke may use a synthetic event with no pull_request and no PR_NUMBER, so the actual entry point takes its documented skip branch before any API call; this verifies JavaScript bundle loading, not PR capture or native SQLite initialization. SQLite is lazy and must be exercised separately with a real Database constructor, local input and the selected ABI binary. Run bootstrap only against a complete owned temporary copy of the chosen dist tree, then remove the copy: normal bootstrap replaces its target native file, including the shipped Win32 ABI137 target with a Linux ABI127 prebuild on Node22. Never let the smoke overwrite the canonical original snapshot or the source-compiled native file in /src/dist. No source rewrites or transport hooks are required.
 
 ## Severity guidance
 
 Demonstrated token exfiltration, runner arbitrary code execution, or unauthorized sensitive source disclosure across a trust boundary is high severity, potentially critical depending on reach and permissions. Unauthorized PR mutation or forged iteration history that materially undermines review integrity is a significant integrity issue, with severity tied to demonstrated attacker capability. Report attacker-triggered memory/CPU/disk exhaustion with practical input bounds and impact; exhaustion confined to one disposable action run is generally medium. Ordinary line-mapping correctness differences are not automatically security vulnerabilities without concrete review-integrity impact.
 
-No production adoption, deployment scale, successful build or passing test suite is asserted.
+No production adoption or deployment scale is asserted. Parent-reported build/unit-test evidence is separate from a live GitHub workflow test; no live GitHub operation was performed.

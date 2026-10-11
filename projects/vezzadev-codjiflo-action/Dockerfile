@@ -28,6 +28,9 @@ RUN npm ci --workspace=@codjiflo/diff-engine --include-workspace-root=false --ig
 
 COPY . /src
 WORKDIR /src
+# Keep the complete shipped bundle/native binaries visible for offline audit.
+# ncc below regenerates /src/dist/index.js; it must not erase that evidence.
+RUN cp -a /src/dist /opt/codjiflo-action-committed-dist
 # The unmodified upstream schema generator expects ../action/ from /scripts.
 RUN ln -s /src /action \
     && npm ci \
