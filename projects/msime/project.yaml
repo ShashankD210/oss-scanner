@@ -1,3 +1,5 @@
 repo: https://github.com/metasequoiaime/msime
 primary_contact: admin@msime.app
 homepage: https://msime.app
+dockerfile: .oss-scanner/Dockerfile
+threat_model: .oss-scanner/threat_model.md
