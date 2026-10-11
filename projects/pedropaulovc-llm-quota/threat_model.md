@@ -20,6 +20,8 @@ The Docker image installs dependencies using the committed `bun.lock` with `--fr
 
 Run commands only in a disposable container with `--network none` and without mounting a real home directory. `--no-refresh` prevents refresh/writeback but does not prevent usage/profile network probes when accounts exist; it is not an offline switch. Never use real OAuth tokens in fixtures.
 
+For every non-help CLI invocation, set `HOME="$(mktemp -d)"` and populate only synthetic credential fixtures, or explicitly pass `discoverAccounts({home: fixtureDirectory})` in a test harness. Never inspect or use the scanner agent's own `/root/.claude` credentials; avoiding host mounts alone does not isolate that in-container credential store.
+
 Offline commands from `/src`:
 
 ```sh
