@@ -58,12 +58,61 @@ scripts, even where Linux cannot execute it.
 
 The Dockerfile copies the real checkout into `/src`, restores the actual .NET 10
 project for `win-x64` with `EnableWindowsTargeting=true`, and cross-publishes its
-framework-dependent Windows executable and portable PDBs to `/src/dist`. It also
-cross-compiles the real native COM DLL and icon/version resources with MinGW-w64
-for Windows x64, retaining debug information and frame pointers. This is an
-analysis build, not a claim of identical MSVC code generation or a signed MSIX
-release. Source, SDK, targeting packs, `/opt/nuget/packages`, native cross-tools,
-and build outputs remain available after networking is removed.
+framework-dependent Windows executable and portable PDBs to `/src/dist`. For the
+native DLL, it runs genuine Microsoft `rc.exe`, `cl.exe`, and `link.exe` under
+64-bit Wine. Wine is only a build-tool host: neither the converter nor the
+extension is executed, loaded, or registered.
+
+The source includes Microsoft's `shobjidl_core.h`, which the previous MinGW-w64
+environment did not provide. Substituting headers or omitting the native build
+would not audit the intended SDK/COM semantics. Clang's `/W4` also enables
+additional diagnostics for the unchanged source (including its partial
+`STARTUPINFOW` initializer), so using genuine MSVC preserves the upstream
+`scripts/build.ps1` flags `/W4 /WX /EHsc /O2 /MT /DUNICODE /D_UNICODE /LD`
+without disabling diagnostics or changing application source. The static CRT
+choice `/MT`, original `.def` exports, and original icon/version resources are
+preserved. The SDK's `uuid.lib` supplies the COM IID definitions.
+
+The native analysis build adds `/Z7` and `/DEBUG:FULL` to retain CodeView object
+information and `/src/dist/HeicToJpegShellExt.pdb`; this is not a signed MSIX
+release or a runtime correctness claim. Native PDB source paths use Wine's
+`Z:\src\...`, which maps to the actual retained `/src/...` checkout. Source,
+Microsoft compiler/SDK/CRT files, their original unpacked contents, package
+cache, Wine prefix, .NET targeting packs, `/opt/nuget/packages`, and build outputs
+remain available after networking is removed. No `install.sh` header rewriting,
+compiler patching, header shim, or replacement native implementation is used.
+
+### Online downloads and third-party terms
+
+All downloads and dependency installation happen during the online Docker
+build, not in the offline rebuild:
+
+- The existing Microsoft .NET 10 SDK image, WindowsDesktop reference packs, and
+  NuGet restore retain their own terms.
+- Ubuntu supplies `wine64`, `python3`, and `msitools` (with its cabinet/MSI
+  dependencies), along with `curl`, CA certificates, and Git. The Wine package's
+  license/copyright notices remain under `/usr/share/doc`.
+- The ISC-licensed `vsdownload.py` from
+  [mstorsjo/msvc-wine](https://github.com/mstorsjo/msvc-wine/tree/514f8ea34842cd6d831804d0e9658d3a32870ae1)
+  is pinned to commit `514f8ea34842cd6d831804d0e9658d3a32870ae1` and verified
+  against SHA-256
+  `278429ffd7ec3aa0080ed0438fe241bb73795555949970cc569db68a60cc386b`.
+  Its copyright/license remains in `/opt/msvc-wine/vsdownload.py`.
+- An immutable
+  [Microsoft VS 2022 package manifest](https://download.visualstudio.microsoft.com/download/pr/bc92e2cb-33de-4a0c-995d-efa817f16b16/6e470016e4324c84c255ffd0beb3767d17ec89cc8561e9409ee3e1f6d29400f5/VisualStudio.vsman)
+  is verified against SHA-256
+  `6e470016e4324c84c255ffd0beb3767d17ec89cc8561e9409ee3e1f6d29400f5`.
+  It pins the servicing package URLs and hashes for MSVC 17.14/14.44 and Windows
+  SDK `10.0.26100` (installed SDK layout `10.0.26100.0`, compiler layout
+  `14.44.35207`). Original Microsoft VSIX/MSI/CAB downloads and notices are kept
+  in `/opt/msvc-cache` and `/opt/msvc`; the manifest remains in `/opt/msvc-wine`.
+- `--accept-license` accepts the
+  [Microsoft Build Tools license](https://go.microsoft.com/fwlink/?LinkId=2179911);
+  the downloaded Windows SDK and CRT also retain their applicable Microsoft
+  license/EULA and redistribution restrictions. The original-code MIT grant
+  does not relicense any of these files. **Do not publish or redistribute this
+  analysis image or its SDK/toolchain cache.** Distribution of compiled runtime
+  components must separately comply with Microsoft's redistributable terms.
 
 Offline managed rebuild (run inside the built image):
 
@@ -76,24 +125,27 @@ dotnet publish src/Heic2Jpg/Heic2Jpg.csproj -c Release -r win-x64 \
 Offline native rebuild (also inside the image):
 
 ```sh
-x86_64-w64-mingw32-windres -I /src/src/ShellExt \
-  /src/src/ShellExt/ShellExt.rc -O coff -o /src/obj/ShellExt/ShellExt.res.o
-x86_64-w64-mingw32-g++ -std=c++17 -O2 -g -fno-omit-frame-pointer \
-  -DUNICODE -D_UNICODE -D_WIN32_WINNT=0x0A00 -DWINVER=0x0A00 \
-  -shared -static -static-libgcc -static-libstdc++ \
-  /src/src/ShellExt/dllmain.cpp /src/src/ShellExt/ShellExt.def \
-  /src/obj/ShellExt/ShellExt.res.o -o /src/dist/HeicToJpegShellExt.dll \
-  -Wl,--out-implib,/src/obj/ShellExt/HeicToJpegShellExt.a \
-  -lole32 -lshlwapi -luser32 -luuid
+mkdir -p /src/obj/ShellExt /src/dist
+cd /src/src/ShellExt
+/usr/lib/wine/wine64 "$SDK_BIN/rc.exe" \
+  /nologo /fo Z:/src/obj/ShellExt/ShellExt.res ShellExt.rc
+/usr/lib/wine/wine64 "$MSVC_BIN/cl.exe" \
+  /nologo /W4 /WX /EHsc /O2 /MT /DUNICODE /D_UNICODE /LD /Z7 \
+  dllmain.cpp Z:/src/obj/ShellExt/ShellExt.res /FoZ:/src/obj/ShellExt/ \
+  /link /DEF:ShellExt.def /OUT:Z:/src/dist/HeicToJpegShellExt.dll \
+  /IMPLIB:Z:/src/obj/ShellExt/ShellExt.lib \
+  /DEBUG:FULL /PDB:Z:/src/dist/HeicToJpegShellExt.pdb \
+  /INCREMENTAL:NO /OPT:REF /OPT:ICF \
+  ole32.lib shlwapi.lib user32.lib uuid.lib
 ```
 
 There is no portable test project or repository Linux test suite. In particular,
 Linux cannot execute the WPF/WIC pipeline, load this Windows DLL, obtain the
-Windows Store HEIF codec, or exercise Explorer. Wine or a substituted decoder
-would not establish correctness of the intended runtime. Do not call a Linux
-`dotnet` execution failure a conversion test, and do not omit managed/native
-source audit because execution is unavailable. MSIX packing with Windows SDK
-`makeappx.exe` is not performed in this container.
+Windows Store HEIF codec, or exercise Explorer. Running the application under
+Wine or a substituted decoder would not establish correctness of the intended
+runtime. Do not call a Linux `dotnet` execution failure a conversion test, and do
+not omit managed/native source audit because execution is unavailable. MSIX
+packing with Windows SDK `makeappx.exe` is not performed in this container.
 
 The real existing application test is `scripts/test-concurrent-naming.ps1`.
 On a separate disposable Windows 11 22H2+ host with .NET Desktop Runtime 10,
@@ -122,10 +174,11 @@ explicit no-clobber goal. Assess crashes, disk/memory/CPU exhaustion and hangs
 based on realistic user-triggered local exposure; this is not a network-facing
 service. Expected rejection of unsupported or corrupt images is not a bug.
 
-Framework/WIC/HEIF codecs and MinGW/.NET build dependencies retain their own
-licenses; the project's original-code MIT grant does not relicense them. No
-vendored third-party codec/source or existing third-party source notice was
-identified. Binary icon/logo provenance is not documented in the checkout;
+Framework/WIC/HEIF codecs, Microsoft SDK/CRT/compiler packages, Wine, and .NET
+build dependencies retain their own licenses; the project's original-code MIT
+grant does not relicense them. No vendored third-party codec/source or existing
+third-party source notice was identified. Binary icon/logo provenance is not
+documented in the checkout;
 do not infer an external artwork grant. Findings should distinguish an
 application flaw from a platform decoder defect and identify the affected
 platform prerequisite. Do not contact live services, copy private credentials,
