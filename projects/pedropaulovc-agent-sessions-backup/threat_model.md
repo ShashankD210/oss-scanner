@@ -45,6 +45,34 @@ all protected assets. Public resource identifiers and public JWKs are not secret
   inherit it. Preview bearer authentication is a distinct, disposable environment,
   not authority over production resources.
 
+### Untrusted PR previews versus production
+
+The CI preview job executes the PR's own code with a credential scoped to a dedicated
+non-production Cloudflare account. PR code must be treated as untrusted: do not claim
+that the preview API token or preview data is secret from the PR author. The derived
+per-PR login bearer is intentionally public, and previews may contain only synthetic
+or explicitly non-sensitive data. Production credentials, OAuth grants, transcript
+storage and managed-CA operations must remain inaccessible to that account and code.
+
+Audit `infra/cf/preview-trust.mjs` and its callers for approved-account enforcement,
+rejection of production identifiers in generated configuration, PR-owned resource
+names, contained regular-file inputs, the 20 MiB Worker bundle cap, and allowlisted
+migration-directory entries. Generated preview configs have no production routes,
+Durable Object bindings or exports; `hub/src/preview.ts` exports the app handler,
+not the production CloudflareOAuthBroker. Child-process environment filtering limits
+accidental credential propagation but is not a sandbox against malicious PR code.
+Audit HTTP/body and parser caps separately, including the QA intake's streamed
+256 KiB cap, JSONL line limits and multipart declared-versus-actual sizes; collector
+defaults or infrastructure body limits do not prove every server-side input bounded.
+
+Production migrations are applied by the protected-main production CI job using a
+separate D1-only migration credential, current-main stale-run rejection, migration
+manifests/baselines and deployment journals. Preview migrations intentionally come
+from the PR and operate only on its disposable resources; their provenance must
+never authorize production migration or resource selection. An unused
+`hub/src/auth/github-oidc.ts` helper is not evidence of an active GitHub-OIDC migration
+authorization path in the application router.
+
 ## Authentication and sensitive operations
 
 The intended production policy is **machine certificates ingest; passkeys egress**.
@@ -158,6 +186,161 @@ is required for this development-mode smoke. The suite's existing diagnostics ar
 written under `/src/hub/test-results` and its HTML report under
 `/src/hub/playwright-report`. Loopback networking still works with Docker
 `--network none`; no host ports or host filesystem mounts are required.
+
+### Independent CLI and synthetic HTTP runtime smoke
+
+The following additional smoke is independent of the test runners. Execute it inside
+the scanner's root shell with networking disabled. Both commands invoke the installed
+application console entries, not a Python import or a test wrapper; `--help` exits
+before reading credentials, opening a browser or performing an HTTP operation.
+
+```sh
+uv run --directory /src/collector --offline --no-sync agent-collector --help
+uv run --directory /src/client --offline --no-sync agent-sessions --help
+```
+
+Create this throwaway driver inside the container; it is not a fourth enrollment
+file or a permanent project test. It starts the existing real local Worker runner,
+then independently uploads a fresh synthetic session, waits for real queue-driven
+FTS indexing, reads normalized and raw content, and checks the rendered HTML. It
+uses neither test mocks nor a manually drained queue.
+
+```sh
+cat > /tmp/oss-sessions-smoke.mjs <<'JS'
+import assert from 'node:assert/strict';
+import { spawn } from 'node:child_process';
+import { createHash, randomUUID } from 'node:crypto';
+import { mkdir, mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { setTimeout as sleep } from 'node:timers/promises';
+
+// Throwaway driver: real repository local runner and real loopback HTTP, no test mocks.
+const home = await mkdtemp(join(tmpdir(), 'oss-sessions-http-smoke-'));
+await mkdir(join(home, '.config'), { recursive: true });
+const env = {
+  PATH: process.env.PATH,
+  HOME: home,
+  USERPROFILE: home,
+  XDG_CONFIG_HOME: join(home, '.config'),
+  LANG: 'C.UTF-8',
+  CI: '1',
+  WRANGLER_SEND_METRICS: 'false',
+  NO_COLOR: '1',
+};
+const child = spawn(process.execPath, [
+  '/src/hub/scripts/environment.mjs', 'e2e', '--port', '0', '--readiness-ms', '180000',
+], { cwd: '/src/hub', env, stdio: ['ignore', 'pipe', 'pipe', 'ipc'] });
+let logs = '';
+let startupTimer;
+let closeInfo;
+const closed = new Promise((resolve) => child.once('close', (code, signal) => {
+  closeInfo = { code, signal };
+  resolve(closeInfo);
+}));
+const ready = new Promise((resolve, reject) => {
+  startupTimer = setTimeout(() => reject(new Error('local runner startup exceeded 300 seconds')), 300000);
+  child.once('error', reject);
+  child.once('exit', (code, signal) => reject(new Error(`local runner exited before readiness: ${code ?? signal}`)));
+  child.stderr.on('data', (chunk) => { logs = (logs + chunk).slice(-16384); });
+  child.stdout.on('data', (chunk) => {
+    logs = (logs + chunk).slice(-16384);
+    const match = logs.match(/Local hub ready: (http:\/\/127\.0\.0\.1:\d+)\r?\n/);
+    if (match) resolve(match[1]);
+  });
+});
+
+async function request(base, path, init = {}) {
+  const response = await fetch(new URL(path, base), { ...init, signal: AbortSignal.timeout(5000) });
+  return { response, text: await response.text() };
+}
+
+try {
+  const base = await ready;
+  clearTimeout(startupTimer);
+  const health = await request(base, '/healthz');
+  assert.equal(health.response.status, 200, health.text);
+  const diagnostics = JSON.parse(health.text);
+  assert.equal(diagnostics.pendingMigrations, 0);
+
+  const machine = 'oss-http-smoke';
+  const sessionId = randomUUID();
+  const marker = `offline synthetic obsidian lantern ${sessionId}`;
+  const common = { isSidechain: false, cwd: '/workspace/oss-synthetic', sessionId, version: '2.1.99', gitBranch: 'main' };
+  const content = [
+    { ...common, type: 'user', userType: 'external', uuid: 'smoke-user', parentUuid: null,
+      timestamp: '2026-07-02T10:00:00.000Z', message: { role: 'user', content: marker } },
+    { ...common, type: 'assistant', uuid: 'smoke-assistant', parentUuid: 'smoke-user', requestId: 'oss-smoke-request',
+      timestamp: '2026-07-02T10:00:05.000Z', message: { id: 'oss-smoke-message', role: 'assistant', model: 'claude-test-1',
+        content: [{ type: 'text', text: `Synthetic acknowledgement: ${marker}` }], usage: { input_tokens: 11, output_tokens: 7 } } },
+  ].map((line) => JSON.stringify(line)).join('\n') + '\n';
+  const bytes = Buffer.from(content);
+  const digest = createHash('sha256').update(bytes).digest('hex');
+  const relpath = `-workspace-oss-synthetic/${sessionId}.jsonl`;
+  const headers = { 'x-dev-machine': machine };
+  const upload = await request(base, `/api/v1/files/${machine}/claude-projects/${encodeURIComponent(relpath)}`, {
+    method: 'PUT', body: bytes,
+    headers: { ...headers, 'x-content-hash': `sha256:${digest}`, 'x-file-mtime': '2026-07-02T10:00:05Z', 'content-length': String(bytes.length) },
+  });
+  assert.ok([200, 201].includes(upload.response.status), `upload ${upload.response.status}: ${upload.text}`);
+
+  const deadline = Date.now() + 60000;
+  let hits = [];
+  do {
+    const query = new URLSearchParams({ q: 'obsidian lantern', machine, limit: '20' });
+    const search = await request(base, `/api/v1/search?${query}`, { headers });
+    assert.equal(search.response.status, 200, search.text);
+    hits = JSON.parse(search.text).hits;
+    assert.ok(Array.isArray(hits), search.text);
+    if (hits.some((hit) => hit.session_id === sessionId)) break;
+    await sleep(250);
+  } while (Date.now() < deadline);
+  assert.ok(hits.some((hit) => hit.session_id === sessionId), 'new upload did not reach real queue-driven FTS indexing within 60 seconds');
+
+  const normalized = await request(base, `/api/v1/sessions/${sessionId}`, { headers });
+  assert.equal(normalized.response.status, 200, normalized.text);
+  const session = JSON.parse(normalized.text).session;
+  assert.equal(session.harness, 'claude-code');
+  assert.equal(session.turns.length, 2);
+  assert.ok(normalized.text.includes(marker), 'normalized read lost synthetic marker');
+  const raw = await request(base, `/api/v1/sessions/${sessionId}/raw`, { headers });
+  assert.equal(raw.response.status, 200, raw.text);
+  assert.equal(raw.text, content, 'raw HTTP read differs from uploaded bytes');
+  const html = await request(base, `/s/${sessionId}`);
+  assert.equal(html.response.status, 200, html.text);
+  assert.match(html.response.headers.get('content-type') ?? '', /^text\/html\b/);
+  assert.ok(html.text.includes(marker), 'HTML viewer did not render the uploaded synthetic session');
+
+  console.log(JSON.stringify({ smoke: 'PASS', base, environmentId: diagnostics.environmentId,
+    pendingMigrations: diagnostics.pendingMigrations, uploadStatus: upload.response.status,
+    uploadedBytes: bytes.length, sha256: digest, sessionId, normalizedTurns: session.turns.length,
+    searchHit: true, rawBytesEqual: true, htmlRendered: true }));
+} catch (error) {
+  console.error(logs);
+  throw error;
+} finally {
+  clearTimeout(startupTimer);
+  if (!closeInfo && child.connected) child.send({ type: 'shutdown' });
+  const forceStop = setTimeout(() => child.kill('SIGTERM'), 20000);
+  const hardStop = setTimeout(() => child.kill('SIGKILL'), 30000);
+  await closed;
+  clearTimeout(forceStop);
+  clearTimeout(hardStop);
+  await rm(home, { recursive: true, force: true });
+  assert.equal(closeInfo.code, 0, `local runner teardown failed: ${JSON.stringify(closeInfo)}`);
+}
+JS
+node /tmp/oss-sessions-smoke.mjs
+```
+
+Require exit status zero in addition to the JSON success line: teardown failures
+must also fail the smoke. During enrollment verification, this exact driver ran
+in the built scanner image with `--network none`, 2 CPUs and 8 GiB memory. Both real
+CLI help entries passed; the HTTP smoke returned 201 for a 914-byte synthetic upload,
+zero pending migrations, a real FTS search hit, two normalized turns, byte-identical
+raw reads and the rendered HTML marker. Each run uses a new UUID and therefore a new
+content SHA-256; the driver computes and checks its own payload, not a fixed digest.
+This is local application runtime proof, not production-authentication certification.
 
 For interactive synthetic inspection instead, run:
 
