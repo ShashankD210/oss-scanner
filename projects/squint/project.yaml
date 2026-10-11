@@ -1,0 +1,6 @@
+# Squint: macOS image optimizer whose Rust engine parses untrusted JPEG, PNG, GIF, TIFF, WebP, HEIC/AVIF, PDF and SVG files and rewrites them in place.
+repo: https://github.com/mdws-org/squint#main
+primary_contact: steam-gab-shape@duck.com
+homepage: https://github.com/mdws-org/squint
+dockerfile: .oss-scanner/Dockerfile
+threat_model: .oss-scanner/threat_model.md
