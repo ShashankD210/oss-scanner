@@ -32,7 +32,7 @@ scripts, even where Linux cannot execute it.
   fields need not be preserved.
 - `src/Heic2Jpg/NamingPolicy.cs` and `Converter.Claim`: existing JPEGs must never
   be overwritten, including under concurrent conversions. Candidates run from
-  `<basename>.jpg` through `<basename> (1000).jpg`. A non-overwriting `File.Move`
+  `<basename>.jpg`, then `<basename> (2).jpg` through `<basename> (1000).jpg`. A non-overwriting `File.Move`
   claims the final name atomically; collision exhaustion must fail. Encoding
   first uses a randomized `.partial` name in the output directory, opened with
   `File.Create` (not `CreateNew`). Audit preexisting temporary paths, reparse
@@ -164,7 +164,7 @@ not omit managed/native source audit because execution is unavailable. MSIX
 packing with Windows SDK `makeappx.exe` is not performed in this container.
 
 The real existing application test is `scripts/test-concurrent-naming.ps1`.
-On a separate disposable Windows 11 22H2+ host with .NET Desktop Runtime 10,
+On a separate disposable Windows 11 22H2+ host using PowerShell 7 with .NET Desktop Runtime 10,
 Microsoft HEIF Image Extensions, the checkout with cross-published `dist`, and
 an explicitly provided local HEIC fixture, run from the checkout root:
 
