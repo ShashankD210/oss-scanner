@@ -1,0 +1,8 @@
+# RemoteAppClient - remote management for fleets of Windows machines: a SYSTEM agent on every device, an ASP.NET
+# Core server behind nginx, operator consoles; TightVNC over SSH reverse tunnels through a bastion, per-device
+# client certificates and TPM-backed keys. https://github.com/v1k70rk4/RemoteAppClient
+repo: https://github.com/v1k70rk4/RemoteAppClient#master
+primary_contact: oss@ivankapal.com
+homepage: https://github.com/v1k70rk4/RemoteAppClient
+dockerfile: .oss-scanner/Dockerfile
+threat_model: .oss-scanner/threat_model.md
