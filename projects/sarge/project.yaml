@@ -1,0 +1,6 @@
+repo: https://github.com/oscarsixsecllc/sarge
+primary_contact: randy@oscarsixsecurityllc.com
+auto_ccs:
+  - security@oscarsixsecurityllc.com
+homepage: https://github.com/oscarsixsecllc/sarge
+dockerfile: Dockerfile.hardened
