@@ -1,0 +1,5 @@
+repo: https://github.com/curecodejp/redmine_more_previews
+primary_contact: security@curecode.jp
+disabled: false
+dockerfile: .oss-scanner/Dockerfile
+threat_model: .oss-scanner/threat_model.md
