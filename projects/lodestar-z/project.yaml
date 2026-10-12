@@ -1,0 +1,6 @@
+repo: https://github.com/ChainSafe/lodestar-z#main
+primary_contact: lodestar@chainsafe.io
+auto_ccs:
+  - cayman@chainsafe.io
+homepage: https://lodestar.chainsafe.io
+threat_model: THREAT_MODEL.md
