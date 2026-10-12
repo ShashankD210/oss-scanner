@@ -41,3 +41,20 @@ RUN set -eux; \
     cd /src/apps/account-directory && npm run build; \
     cd /src/packages/sdk && npm run build; \
     cd /src/packages/chat-ui && npm run build
+
+# tools/check opens the final shell as root. Give the unprivileged node user
+# write access to package directories so Vitest can create its config and cache
+# files when permission-sensitive tests run as node.
+RUN set -eu; \
+    for package in \
+      apps/ade-cli \
+      apps/desktop \
+      apps/web \
+      apps/webhook-relay \
+      apps/tunnel-relay \
+      apps/push-relay \
+      apps/account-directory \
+      packages/sdk \
+      packages/chat-ui; do \
+      chown node:node "/src/$package" "/src/$package/node_modules"; \
+    done

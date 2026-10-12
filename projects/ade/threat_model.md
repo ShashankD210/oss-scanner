@@ -32,6 +32,26 @@ fixtures and local test commands. Do not depend on live accounts, provider
 credentials, or production services. The scanner image builds the Linux
 Node-based products; iOS and native Swift targets require macOS.
 
+The `tools/check` shell starts as root. Run permission-sensitive desktop tests
+as the unprivileged `node` user so tests that exercise filesystem permissions
+and username redaction see normal user behavior. On Linux, skip
+`apps/desktop/src/main/services/ios/iosSimulatorService.test.ts`: it launches
+the macOS Simulator with `open -a Simulator`, which is unavailable in this
+image. Treat those spawn errors as an unsupported test environment, not an ADE
+runtime result. The CLI login-shell test fixture also delegates to `/bin/sh`
+with Bash-only login flags on Debian; validate the actual shell behavior before
+attributing that fixture failure to ADE.
+
+The CTO memory suite has order-sensitive failures in the Linux run. Keep those
+results visible, and confirm any security finding with a reproducer that shows
+a project, lane, account, or credential boundary being crossed.
+
+The sync address test assumes the device has a reachable LAN address. The
+network-isolated scanner container can refresh the saved host to its container
+hostname while the pairing builder prefers seeded LAN candidates. Do not treat
+that fixture mismatch as a finding without reproducing it on a supported host
+network.
+
 ## How you rate severity
 
 - Critical: a reproducible unauthenticated remote compromise, machine takeover,
