@@ -1,0 +1,8 @@
+name: kpru
+main_repo: https://github.com/treekasai/kpru
+primary_contact: treekasai@gmail.com
+languages:
+  - javascript
+  - html
+description: >
+  Web applications and web tools for university operations and services.
