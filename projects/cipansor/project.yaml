@@ -1,0 +1,15 @@
+# Cipansor IMS: the integrated information management system for
+# Yayasan Pesantren Cipansor (TK Qur'an, SD IT, SMP IT, SMA Qur'an + tahfidz).
+# pnpm + Turborepo monorepo: Express 5 + Prisma 7 + Redis API, Next.js 16 web.
+repo: https://github.com/cipansor/cipansor#main
+
+# Security contact: reports and build problems go here. Public by design,
+# so this is the yayasan's general address rather than a personal one.
+primary_contact: admin@cipansor.or.id
+
+homepage: https://cipansor.or.id
+
+disabled: false
+
+# The Dockerfile and threat_model.md live next to this file
+# (projects/cipansor/), so neither key is set.
