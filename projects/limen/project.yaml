@@ -1,5 +1,5 @@
 repo: https://github.com/agent-engineering-studio/limen#main
-primary_contact: security@hevolus.it
+primary_contact: gzileni@agentengineering.it
 homepage: https://github.com/agent-engineering-studio/limen
 disabled: false
 dockerfile: .oss-scanner/Dockerfile
