@@ -1,0 +1,5 @@
+# HASS.Agent .NET10 integration: the Home Assistant custom integration for the HASS.Agent .NET10 Windows client.
+repo: https://github.com/v1k70rk4/HASS.Agent.NET10-Integration#main
+primary_contact: oss@ivankapal.com
+homepage: https://v1k70rk4.github.io/HASS.Agent.NET10/
+disabled: false
