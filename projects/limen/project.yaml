@@ -1,0 +1,6 @@
+repo: https://github.com/agent-engineering-studio/limen#main
+primary_contact: security@hevolus.it
+homepage: https://github.com/agent-engineering-studio/limen
+disabled: false
+dockerfile: .oss-scanner/Dockerfile
+threat_model: .oss-scanner/threat_model.md
