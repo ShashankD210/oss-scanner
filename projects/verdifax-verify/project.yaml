@@ -1,0 +1,9 @@
+# verdifax-verify: standalone offline verifier for Verdifax audit bundles, sealed
+# records of AI decisions. It recomputes every canonical hash from bundle content
+# and re-verifies SEV-SNP reports and Rekor proofs; its exit code is the verdict
+# auditors act on. Dockerfile and threat_model.md live in the repository.
+repo: https://github.com/Verdifax/verdifax-verify#main
+primary_contact: robert@verdifax.com
+homepage: https://verdifax.com
+dockerfile: .oss-scanner/Dockerfile
+threat_model: .oss-scanner/threat_model.md
