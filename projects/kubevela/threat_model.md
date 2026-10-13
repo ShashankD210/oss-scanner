@@ -153,9 +153,17 @@ Environment notes the baseline depends on:
   envtest binaries.
 - etcd logs `failed to detect default host` and the container hostname does not resolve. Both
   are harmless; etcd listens on loopback regardless.
-- `GOFLAGS` skips `TestGenSdk` (needs `docker run`) and `TestAuthn` in `pkg/utils/registries`
-  (needs a public registry). They are not findings. Everything else in the two baseline
-  commands is expected to pass offline.
+- `/root/.kube/config` points at a closed port on purpose. The shared client code resolves a
+  REST config with a loader that exits the process silently when no kubeconfig exists, and
+  several unit tests reach it through the CueX default compiler. With a resolvable but
+  unreachable config, the failure becomes a logged error and the tests run. Do not remove it;
+  if you need to prove behaviour with no kubeconfig at all, set `KUBECONFIG` to a missing
+  path for that one command, as `pkg/cue/cuex/compiler_guard_test.go` does.
+- `GOFLAGS` skips seven tests that need Docker or the network: `TestGenSdk` (runs
+  `docker run`), `TestAuthn`, `TestImageRegistry`, `TestHelmRepository`, `TestHelm`,
+  `TestLoadRepo` and `TestHTTPGetKubernetesObjects` (public registries, Helm repositories or
+  GitHub). They are not findings. Everything else in the two baseline commands is expected to
+  pass offline.
 - To see envtest's own stderr when a suite fails to start, set
   `KUBEBUILDER_ATTACH_CONTROL_PLANE_OUTPUT=true`.
 

@@ -43,11 +43,20 @@ RUN mv /opt/kubebuilder-assets/kube-apiserver /opt/kubebuilder-assets/kube-apise
          > /opt/kubebuilder-assets/kube-apiserver \
     && chmod +x /opt/kubebuilder-assets/kube-apiserver
 
-# Two tests can never pass in this environment and would only send the scanner chasing noise:
+# The shared client singletons resolve their REST config with controller-runtime's GetConfigOrDie, which calls
+# os.Exit(1) through a sink-less logger when no kubeconfig exists at all. Several unit tests reach that path
+# through the CueX default compiler and the whole test binary vanishes with no message. A kubeconfig only has
+# to be resolvable, not reachable: point one at a closed port so the failure becomes an ordinary logged error.
+RUN mkdir -p /root/.kube \
+    && printf 'apiVersion: v1\nkind: Config\nclusters: [{name: none, cluster: {server: "https://127.0.0.1:1"}}]\ncontexts: [{name: none, context: {cluster: none, user: none}}]\nusers: [{name: none, user: {token: none}}]\ncurrent-context: none\n' \
+         > /root/.kube/config
+
+# These tests can never pass in this environment and would only send the scanner chasing noise:
 #   TestGenSdk runs the OpenAPI generator through `docker run`; there is no Docker daemon in the image.
-#   TestAuthn (pkg/utils/registries) authenticates against a real public registry over the network.
+#   TestAuthn, TestImageRegistry, TestHelmRepository, TestHelm, TestLoadRepo and TestHTTPGetKubernetesObjects
+#   talk to public registries, Helm repositories or GitHub over the network.
 # GOFLAGS applies to every `go test`, including the ones the scanner runs later; `go build` ignores -skip.
-ENV GOFLAGS="-skip=^(TestGenSdk|TestAuthn)$"
+ENV GOFLAGS="-skip=^(TestGenSdk|TestAuthn|TestImageRegistry|TestHelmRepository|TestHelm|TestLoadRepo|TestHTTPGetKubernetesObjects)$"
 
 # Run the unit tests the same way `make unit-test-core` does, so the build and test caches are warm offline.
 # A failing baseline test must not abort the image build; the scanner still needs the environment.
