@@ -1,0 +1,7 @@
+repo: https://github.com/airbytehq/airbyte-platform#main
+
+primary_contact: oss-scanner@airbyte.io
+
+homepage: https://airbyte.com
+
+disabled: false
