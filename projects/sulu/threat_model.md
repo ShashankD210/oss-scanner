@@ -14,8 +14,8 @@ Media uploads, rich-text/HTML content, URL and redirect handling, and the previe
 - Out of scope: third-party dependencies in `vendor/` (report upstream), issues requiring a malicious site administrator.
 
 ## How to exercise it
-- The component tests under `src/Sulu/**/Tests` and the functional tests; `composer test` is defined in `composer.json`.
-  A database (MySQL/PostgreSQL) is needed for the functional tests.
+- The component tests run offline in the image: `php vendor/bin/phpunit --testsuite components`.
+  The functional tests (`composer test`) need a database (MySQL/PostgreSQL), which the image does not provide.
 
 ## How you rate severity
 - Unauthenticated RCE, SQL injection, authentication bypass: critical.
