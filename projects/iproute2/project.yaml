@@ -1,0 +1,8 @@
+# iproute2: userspace network setup tools for Linux
+#
+# Upstream is kernel.org; GitHub is read-only mirror
+repo: https://github.com/iproute2/iproute2
+primary_contact: stephen@networkplumber.org
+auto_ccs:
+  - dsahern@gmail.com
+disabled: false
