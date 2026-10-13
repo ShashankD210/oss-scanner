@@ -2,7 +2,8 @@
 # The scanner supplies the kubevela checkout as the build context. Network is available during this build
 # and removed afterwards, so the Go toolchain, module cache, envtest binaries and test caches are all
 # fetched here and kept in the image.
-FROM golang:1.23-bookworm
+# Go version follows the `go` directive in kubevela's go.mod on master (1.27.x at enrolment time).
+FROM golang:1.27-bookworm
 
 ENV DEBIAN_FRONTEND=noninteractive \
     GOTOOLCHAIN=local \
@@ -24,11 +25,11 @@ RUN go build -o /usr/local/bin/manager ./cmd/core \
     && go build -o /usr/local/bin/kubectl-vela ./cmd/plugin
 
 # Unit tests run a real kube-apiserver and etcd through controller-runtime envtest. Fetch those binaries now
-# so the suite works offline. The release branch matches the controller-runtime version in go.mod (v0.19.x);
-# the Kubernetes version matches ENVTEST_K8S_VERSION in makefiles/dependency.mk.
-RUN GOBIN=/usr/local/bin go install sigs.k8s.io/controller-runtime/tools/setup-envtest@release-0.19 \
-    && setup-envtest use 1.31.0 --bin-dir /opt/envtest -p path \
-    && ln -s "$(setup-envtest use 1.31.0 --bin-dir /opt/envtest -p path)" /opt/kubebuilder-assets
+# so the suite works offline. The release branch matches the controller-runtime version in go.mod (v0.25.x);
+# the Kubernetes version matches ENVTEST_K8S_VERSION in makefiles/dependency.mk (1.37.0).
+RUN GOBIN=/usr/local/bin go install sigs.k8s.io/controller-runtime/tools/setup-envtest@release-0.25 \
+    && setup-envtest use 1.37.0 --bin-dir /opt/envtest -p path \
+    && ln -s "$(setup-envtest use 1.37.0 --bin-dir /opt/envtest -p path)" /opt/kubebuilder-assets
 ENV KUBEBUILDER_ASSETS=/opt/kubebuilder-assets
 
 # Run the unit tests the same way `make unit-test-core` does, so the build and test caches are warm offline.
