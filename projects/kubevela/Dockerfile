@@ -32,6 +32,21 @@ RUN GOBIN=/usr/local/bin go install sigs.k8s.io/controller-runtime/tools/setup-e
     && ln -s "$(setup-envtest use 1.37.0 --bin-dir /opt/envtest -p path)" /opt/kubebuilder-assets
 ENV KUBEBUILDER_ASSETS=/opt/kubebuilder-assets
 
+# The scanner's analysis container has no network interface and therefore no default route. kube-apiserver
+# treats envtest's loopback --bind-address as unusable and tries to pick an advertise address from the routing
+# table, then exits with "Unable to find suitable network address". Every envtest-based suite dies on that.
+# Wrap the binary so --advertise-address=127.0.0.1 is always present; the tests themselves never set it.
+RUN mv /opt/kubebuilder-assets/kube-apiserver /opt/kubebuilder-assets/kube-apiserver.real \
+    && printf '#!/bin/sh\nexec "$(dirname "$0")/kube-apiserver.real" --advertise-address=127.0.0.1 "$@"\n' \
+         > /opt/kubebuilder-assets/kube-apiserver \
+    && chmod +x /opt/kubebuilder-assets/kube-apiserver
+
+# Two tests can never pass in this environment and would only send the scanner chasing noise:
+#   TestGenSdk runs the OpenAPI generator through `docker run`; there is no Docker daemon in the image.
+#   TestAuthn (pkg/utils/registries) authenticates against a real public registry over the network.
+# GOFLAGS applies to every `go test`, including the ones the scanner runs later; `go build` ignores -skip.
+ENV GOFLAGS="-skip=^(TestGenSdk|TestAuthn)$"
+
 # Run the unit tests the same way `make unit-test-core` does, so the build and test caches are warm offline.
 # A failing baseline test must not abort the image build; the scanner still needs the environment.
 RUN go test -timeout 30m $(go list ./pkg/... ./cmd/... ./apis/... | grep -v apiserver | grep -v applicationconfiguration) \

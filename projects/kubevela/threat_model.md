@@ -139,8 +139,23 @@ able to achieve the same effect by design.
 
 - Rendering can be exercised with no cluster at all: `vela dry-run -f app.yaml -d def.cue`
   renders an Application against local definitions, and `vela def vet def.cue` validates a
-  definition. Many template-level issues reproduce this way.
+  definition. Many template-level issues reproduce this way. The `No usable kubeconfig`
+  message these commands print is expected here; it only means external CueX packages were
+  not loaded from a cluster.
 - `GOPROXY=off` and `GOSUMDB=off` are set. Reproducers must build from the module cache.
+
+Environment notes the baseline depends on:
+
+- The `kube-apiserver` under `KUBEBUILDER_ASSETS` is a wrapper that adds
+  `--advertise-address=127.0.0.1`. Without it the API server cannot start in a container that
+  has no default route. Keep the wrapper if you copy or replace the envtest binaries.
+- etcd logs `failed to detect default host` and the container hostname does not resolve. Both
+  are harmless; etcd listens on loopback regardless.
+- `GOFLAGS` skips `TestGenSdk` (needs `docker run`) and `TestAuthn` in `pkg/utils/registries`
+  (needs a public registry). They are not findings. Everything else in the two baseline
+  commands is expected to pass offline.
+- To see envtest's own stderr when a suite fails to start, set
+  `KUBEBUILDER_ATTACH_CONTROL_PLANE_OUTPUT=true`.
 
 Preferred reproducer: a Go test, envtest-based where a controller or webhook is involved, or
 a `vela dry-run` invocation for render-level issues. Preferred patch: a unified diff against
