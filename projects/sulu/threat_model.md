@@ -14,8 +14,8 @@ Media uploads, rich-text/HTML content, URL and redirect handling, and the previe
 - Out of scope: third-party dependencies in `vendor/` (report upstream), issues requiring a malicious site administrator.
 
 ## How to exercise it
-- The component tests run offline in the image: `php vendor/bin/phpunit --testsuite components`.
-  The functional tests (`composer test`) need a database (MySQL/PostgreSQL), which the image does not provide.
+- Start the database with `sulu-db-start`, then run `php bin/runtests -i -a` (`-i` creates the schema).
+  `-t MediaBundle` runs one bundle. All suites pass offline except one media test that fetches a URL.
 
 ## How you rate severity
 - Unauthenticated RCE, SQL injection, authentication bypass: critical.
