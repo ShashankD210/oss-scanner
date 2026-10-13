@@ -52,11 +52,15 @@ RUN mkdir -p /root/.kube \
          > /root/.kube/config
 
 # These tests can never pass in this environment and would only send the scanner chasing noise:
-#   TestGenSdk runs the OpenAPI generator through `docker run`; there is no Docker daemon in the image.
-#   TestAuthn, TestImageRegistry, TestHelmRepository, TestHelm, TestLoadRepo and TestHTTPGetKubernetesObjects
-#   talk to public registries, Helm repositories or GitHub over the network.
+#   TestGenSdk and TestNewDefinitionGenAPICommand run the OpenAPI generator through `docker`; none in the image.
+#   TestAuthn, TestImageRegistry, TestHelmRepository, TestHelm, TestLoadRepo, TestHTTPGetKubernetesObjects,
+#   TestCueXEval and TestGenerateTerraformCapabilityProperties reach registries, Helm repositories, cuelang.org
+#   or GitHub over the network.
+# Three specs inside the TestCli Ginkgo suite (addon status and listing against the public registry) also need
+# the network. They are left running and listed in threat_model.md, because skipping TestCli would drop the
+# whole CLI suite and Ginkgo's own skip flag cannot be passed through GOFLAGS.
 # GOFLAGS applies to every `go test`, including the ones the scanner runs later; `go build` ignores -skip.
-ENV GOFLAGS="-skip=^(TestGenSdk|TestAuthn|TestImageRegistry|TestHelmRepository|TestHelm|TestLoadRepo|TestHTTPGetKubernetesObjects)$"
+ENV GOFLAGS="-skip=^(TestGenSdk|TestNewDefinitionGenAPICommand|TestAuthn|TestImageRegistry|TestHelmRepository|TestHelm|TestLoadRepo|TestHTTPGetKubernetesObjects|TestCueXEval|TestGenerateTerraformCapabilityProperties)$"
 
 # Run the unit tests the same way `make unit-test-core` does, so the build and test caches are warm offline.
 # A failing baseline test must not abort the image build; the scanner still needs the environment.

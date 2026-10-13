@@ -159,11 +159,16 @@ Environment notes the baseline depends on:
   unreachable config, the failure becomes a logged error and the tests run. Do not remove it;
   if you need to prove behaviour with no kubeconfig at all, set `KUBECONFIG` to a missing
   path for that one command, as `pkg/cue/cuex/compiler_guard_test.go` does.
-- `GOFLAGS` skips seven tests that need Docker or the network: `TestGenSdk` (runs
-  `docker run`), `TestAuthn`, `TestImageRegistry`, `TestHelmRepository`, `TestHelm`,
-  `TestLoadRepo` and `TestHTTPGetKubernetesObjects` (public registries, Helm repositories or
-  GitHub). They are not findings. Everything else in the two baseline commands is expected to
-  pass offline.
+- `GOFLAGS` skips ten tests that need Docker or the network: `TestGenSdk` and
+  `TestNewDefinitionGenAPICommand` (run the OpenAPI generator through `docker`), and
+  `TestAuthn`, `TestImageRegistry`, `TestHelmRepository`, `TestHelm`, `TestLoadRepo`,
+  `TestHTTPGetKubernetesObjects`, `TestCueXEval`, `TestGenerateTerraformCapabilityProperties`
+  (public registries, Helm repositories, cuelang.org or GitHub). They are not findings.
+- The `TestCli` suite in `references/cli` reports exactly three failing specs offline, all in
+  `addon_suite_test.go`: the two "addon is not installed locally, but in registry" status
+  specs and "should print fluxcd in the registry as disabled". Each fails on a DNS lookup of
+  `kubevela.github.io`. They are expected and are not findings; the rest of the suite is the
+  CLI baseline. Everything else in the two baseline commands is expected to pass offline.
 - To see envtest's own stderr when a suite fails to start, set
   `KUBEBUILDER_ATTACH_CONTROL_PLANE_OUTPUT=true`.
 
