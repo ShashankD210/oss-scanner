@@ -1,0 +1,68 @@
+# Colibri Stateless: a prover/verifier for Ethereum (and OP-Stack L2) RPC data.
+# The core is portable C with bindings for JavaScript/TypeScript, Python,
+# Kotlin/Java, Swift, Dart, and Rust, used by wallets and embedded clients to
+# cryptographically verify RPC responses without running a full node.
+#
+# Dockerfile and threat_model live in the project repository under .oss-scanner/
+# so they can be updated without a new pull request here.
+repo: https://github.com/corpus-core/colibri-stateless#dev
+primary_contact: simon@corpus.io
+homepage: https://www.corpuscore.tech/colibri
+dockerfile: .oss-scanner/Dockerfile
+threat_model: .oss-scanner/threat_model.md
+# OpenPGP public key for simon@corpus.io (RSA 4096,
+# fingerprint B3EF 27A5 7D8A 3569 C5AA  203C 5D4A 6CE6 C300 5C80).
+# When set, every report is encrypted to this key and sent to primary_contact
+# only; auto_ccs is not compatible with pgp.
+pgp: |
+  -----BEGIN PGP PUBLIC KEY BLOCK-----
+  
+  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
+  =+slA
+  -----END PGP PUBLIC KEY BLOCK-----
