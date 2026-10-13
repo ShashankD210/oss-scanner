@@ -1,0 +1,4 @@
+repo: https://github.com/metal-stack/metal-apiserver#main
+primary_contact: security@metal-stack.io
+homepage: https://metal-stack.io
+disabled: false
