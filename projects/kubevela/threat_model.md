@@ -147,8 +147,10 @@ able to achieve the same effect by design.
 Environment notes the baseline depends on:
 
 - The `kube-apiserver` under `KUBEBUILDER_ASSETS` is a wrapper that adds
-  `--advertise-address=127.0.0.1`. Without it the API server cannot start in a container that
-  has no default route. Keep the wrapper if you copy or replace the envtest binaries.
+  `--advertise-address=127.0.0.1 --endpoint-reconciler-type=none`. Without the first flag the
+  API server cannot pick an address in a container that has no default route; without the
+  second it refuses a loopback advertise address. Keep the wrapper if you copy or replace the
+  envtest binaries.
 - etcd logs `failed to detect default host` and the container hostname does not resolve. Both
   are harmless; etcd listens on loopback regardless.
 - `GOFLAGS` skips `TestGenSdk` (needs `docker run`) and `TestAuthn` in `pkg/utils/registries`

@@ -36,8 +36,10 @@ ENV KUBEBUILDER_ASSETS=/opt/kubebuilder-assets
 # treats envtest's loopback --bind-address as unusable and tries to pick an advertise address from the routing
 # table, then exits with "Unable to find suitable network address". Every envtest-based suite dies on that.
 # Wrap the binary so --advertise-address=127.0.0.1 is always present; the tests themselves never set it.
+# A loopback advertise address is refused by the endpoint reconciler ("may not be in the loopback range"), and
+# envtest has no use for the kubernetes Service endpoints it publishes, so the reconciler is turned off too.
 RUN mv /opt/kubebuilder-assets/kube-apiserver /opt/kubebuilder-assets/kube-apiserver.real \
-    && printf '#!/bin/sh\nexec "$(dirname "$0")/kube-apiserver.real" --advertise-address=127.0.0.1 "$@"\n' \
+    && printf '#!/bin/sh\nexec "$(dirname "$0")/kube-apiserver.real" --advertise-address=127.0.0.1 --endpoint-reconciler-type=none "$@"\n' \
          > /opt/kubebuilder-assets/kube-apiserver \
     && chmod +x /opt/kubebuilder-assets/kube-apiserver
 
