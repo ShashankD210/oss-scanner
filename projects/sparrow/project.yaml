@@ -1,0 +1,5 @@
+repo: https://github.com/sarathsp06/sparrow#main
+primary_contact: sarath.sp06@gmail.com
+homepage: https://sarathsp06.github.io/sparrow/
+dockerfile: .oss-scanner/Dockerfile
+threat_model: .oss-scanner/threat_model.md
