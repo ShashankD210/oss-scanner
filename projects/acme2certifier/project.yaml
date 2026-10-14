@@ -1,5 +1,5 @@
 repo: https://github.com/grindsa/acme2certifier
-primary_contact: joern.mewes@gmail.com
+primary_contact: grindelsack@gmail.com
 homepage: https://github.com/grindsa/acme2certifier
 disabled: false
 dockerfile: .oss-scanner/Dockerfile
