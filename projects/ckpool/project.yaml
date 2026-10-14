@@ -1,0 +1,6 @@
+repo: https://bitbucket.org/ckolivas/ckpool.git#master
+primary_contact: kernel@kolivas.org
+homepage: https://bitbucket.org/ckolivas/ckpool
+disabled: false
+dockerfile: .oss-scanner/Dockerfile
+threat_model: .oss-scanner/threat_model.md
