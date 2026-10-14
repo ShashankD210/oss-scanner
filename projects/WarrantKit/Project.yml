@@ -1,0 +1,6 @@
+repo: https://github.com/Therealdk8890/WarrantKit#main
+primary_contact: danielpaulkissel@gmail.com
+homepage: https://github.com/Therealdk8890/WarrantKit
+disabled: false
+dockerfile: .oss-scanner/Dockerfile
+threat_model: docs/THREAT_MODEL.md
