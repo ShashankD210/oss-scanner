@@ -1,0 +1,8 @@
+# hoprd: Full HOPR node daemon and REST API interface.
+# HOPR is a privacy-preserving decentralized mixnet enabling metadata-private point-to-point data exchange.
+# The Dockerfile and threat_model.md sit next to this file.
+repo: https://github.com/hoprnet/hoprd#main
+primary_contact: security@hoprnet.org
+auto_ccs:
+  - tech@hoprnet.org
+homepage: https://hoprnet.org
