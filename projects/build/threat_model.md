@@ -2,79 +2,93 @@
 
 
 
-## Scope and trust boundary
+## What build does and where untrusted input enters
 
-build is the reference-style Python build frontend for PEP 517 projects. `ProjectBuilder` reads `pyproject.toml`, asks
-the selected backend for build requirements and metadata, creates an isolated environment, installs requirements, and
-invokes backend hooks to produce a source distribution or wheel. The CLI exposes the same flow through `python -m build`
-and `pyproject-build`.
+build is the PyPA frontend for building source distributions and wheels from PEP 517 projects. `ProjectBuilder` reads
+the `[build-system]` table, invokes backend hooks, checks build requirements and returns the backend's artifact. The CLI
+adds isolated-environment creation, requirement installation, sdist-to-wheel builds and report generation.
 
-A build backend named by a project is arbitrary code and is trusted to execute with the user's privileges. Building an
-untrusted source tree is therefore not a sandboxed operation. The frontend is responsible for invoking the backend and
-installer it selected, maintaining argument and path boundaries, and rejecting malformed backend results before it
-copies artifacts to the requested output directory.
+Project build configuration is executable. The backend named by `pyproject.toml`, its in-tree `backend-path`, its build
+requirements and legacy `setup.py` can run arbitrary code with the caller's privileges. No sandbox contains an untrusted
+checkout. This is the same boundary used by other build tools: configuration can request code execution, while an input
+escaping a promised path or argument boundary is not.
 
-Hostile inputs include:
+Inputs worth treating as hostile are:
 
-- `pyproject.toml` build-system requirements, backend name and backend path;
-- backend hook return values: dependency strings, metadata directories, artifact filenames and exceptions;
-- source-tree paths, output-directory paths, symlinks and pre-existing files;
-- wheel and sdist filenames and archive bytes returned by the backend;
-- subprocess output, locale-dependent text and environment variables forwarded to isolated builds;
-- custom runners supplied through the Python API. The runner itself is trusted, while build must pass it the exact
-  command, working directory and extra environment required by the documented API.
+- the types and values under `[build-system]`, including requirement strings, backend names and `backend-path` entries;
+- values returned by backend hooks, including additional requirements, metadata directory names, artifact filenames and
+  exceptions;
+- source, output, report, constraint and isolated-environment paths, including pre-existing symlinks and files;
+- wheel and sdist filenames and archive contents when build opens them to inspect metadata or chains an sdist build into
+  a wheel build;
+- backend and installer stdout, stderr, encodings and exit statuses;
+- custom runners supplied through the Python API. build trusts the runner as code, but must pass the documented argv,
+  working directory and environment without changing their meaning.
 
-
-
-## Components to examine
-
-Prioritize `src/build/_builder.py`: validation of build-system configuration, backend-path containment, hook return
-values, dependency checks, metadata preparation and final artifact selection. Examine `env.py` for isolated-environment
-creation, interpreter choice and requirement installation, and `__main__.py` for CLI path handling and cleanup.
-
-Check that a backend cannot use a crafted relative or absolute artifact name to make build accept a file outside the
-backend output directory, overwrite an unrelated destination, or confuse an artifact left by an earlier hook. Review
-temporary-directory cleanup and symlink behavior. Requirement parsing must preserve markers and URLs without turning
-data into extra installer arguments.
-
-The PEP 517 backend and installer are separate trust domains. A defect wholly inside pip, uv, virtualenv,
-`pyproject-hooks` or a selected backend is out of scope unless build forms unsafe arguments or trusts a result it should
-validate.
+pip, uv, `venv`, `pyproject-hooks` and the selected backend have separate security boundaries. Attribute a report to
+build only when its validation, path handling or invocation makes the defect reachable.
 
 
 
-## Exercising the image
+## Components to prioritize
 
-The checkout is at `/src`; build and its test dependencies are installed in `/opt/venv`, and a wheel is under
-`/opt/wheels`. Run `python -m pytest tests`. The fixtures in `tests/packages` and helpers in
-`tests/integration_sources.py` cover in-tree backends, malformed metadata and artifact production. Reproductions should
-use a small source tree with a minimal backend that returns a crafted value from one hook.
+Start with `src/build/_builder.py`. Review `_parse_build_system_table`, backend-path validation, dependency checks,
+metadata preparation, hook exception handling and artifact selection. A backend path must satisfy the PEP 517 in-tree
+rule on every platform, including through symlinks, `..`, drive-relative and UNC forms. Hook results must name the
+artifact produced for that invocation rather than an absolute path, an earlier file or a sibling outside the backend
+output directory.
 
-The scan is offline. Tests that download build requirements need a local wheel or mocked installer; this is useful for
-separating frontend behavior from an index or installer.
+In `src/build/env.py`, inspect isolated-environment creation, caller-supplied environment paths, interpreter selection,
+dependency installation, `PATH`/`PYTHONPATH` construction and cleanup. A requirement string is one installer operand,
+even when it contains URLs, markers or shell metacharacters. Recursive cleanup must not follow a path exchanged after
+validation.
 
+The CLI in `src/build/__main__.py` controls temporary directories, output replacement, sdist extraction, config
+settings, constraint files and build reports. Treat archive members from a backend-produced sdist as coming from already
+trusted backend code, but still check whether build adds an unsafe extraction or destination choice beyond that trust.
 
-
-## Severity guidance
-
-- High: a backend return value causes build, rather than the already-trusted backend, to overwrite or disclose a file
-  outside the source, temporary and requested output directories; or build loads a backend outside the permitted
-  `backend-path` without that code already being importable by design.
-- Medium: dependency or command argument injection makes the frontend install a different requirement than the backend
-  returned, an artifact from the wrong location is reported as the result, or cleanup follows a crafted symlink.
-- Low: denial of service, misleading diagnostics, accepting an invalid artifact that has no demonstrated security
-  impact, or leaving files inside a temporary build directory.
-
-Include the frontend API or CLI command, source tree, backend hook results, selected runner and resulting filesystem
-changes in a report.
+Tests and documentation are useful fixtures. Release and CI automation are outside the installed frontend unless a
+production code path shares the defect.
 
 
 
-## Out of scope
+## How to exercise the image
 
-- Arbitrary behavior by the backend named in `pyproject.toml`, including network and filesystem access.
-- Code execution by build requirements or the package installer during installation.
-- Malicious contents inside a wheel or sdist that build returns without opening; consumers must validate archives when
-  they extract or install them.
-- A custom runner that changes the argv or environment passed to it.
-- Package-index compromise, dependency confusion from index configuration, and unsupported backend behavior.
+The checkout is at `/src`; the image installs build and its test dependencies in `/opt/venv` and places a wheel under
+`/opt/wheels`. Run `python -m pytest tests`. The fixtures under `tests/packages` and helpers in
+`tests/integration_sources.py` cover in-tree backends, malformed metadata and artifact production.
+
+Use a minimal source tree and backend for a security reproducer. Make one hook return the crafted requirement, metadata
+path or artifact name, then call the public `ProjectBuilder` API or `python -m build`. Record the runner arguments and
+filesystem before and after the call. Use local wheels or a mocked installer because the scan is offline.
+
+
+
+## Severity
+
+- High: build accepts a backend or artifact outside the PEP 517 permitted roots and thereby executes, overwrites or
+  discloses code or data that the selected backend could not already reach through its trusted execution.
+- High: an attacker who controls a path inside the source or isolated environment uses a symlink race to make build
+  delete or overwrite an unrelated file with higher privileges.
+- Medium: a requirement or config value crosses an argv boundary and changes the installer operation; build reports an
+  artifact from the wrong directory or invocation; or cleanup escapes a caller-supplied temporary root.
+- Low: a controlled exception, hang, misleading diagnostic or invalid artifact with no demonstrated confidentiality or
+  integrity impact.
+
+
+
+## Reports and exclusions
+
+Include the build commit, API or CLI command, source tree, complete `[build-system]` table, backend hook results,
+selected runner, spawned argv and resulting files. State which behavior belongs to build rather than the backend or
+installer.
+
+Do not report:
+
+- arbitrary behavior by the backend, `setup.py` or build requirements selected by the project;
+- installation-time execution by a requested dependency;
+- a custom runner changing the command it receives;
+- malicious wheel or sdist contents that build returns without interpreting;
+- package-index compromise or dependency confusion when build preserves the requested requirements and index
+  configuration;
+- a defect in pip, uv, `venv`, `pyproject-hooks` or a backend that reproduces without build.
