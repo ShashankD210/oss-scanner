@@ -3,8 +3,6 @@
 The reporting policy is `.github/SECURITY.md`. Use GitHub private vulnerability reporting or the Tidelift contact
 described there, not a public issue.
 
-
-
 ## What pytest-env does and where untrusted input enters
 
 pytest-env is a pytest plugin that reads environment assignments from pytest configuration and optional dotenv files,
@@ -28,8 +26,6 @@ The plugin still owns parsing and precedence. Inputs to test include:
 - process-environment values read during formatting or protected by skip-if-set;
 - values printed when the user enables verbose reporting.
 
-
-
 ## Components to prioritize
 
 All installed behavior is in `src/pytest_env/plugin.py`. Follow `pytest_load_initial_conftests` through TOML discovery,
@@ -50,8 +46,6 @@ it.
 `python-dotenv` and pytest configuration discovery are dependencies. Attribute a finding to pytest-env when its path
 choice, merge order or diagnostics create the impact.
 
-
-
 ## How to exercise the image
 
 The checkout is at `/src`, installed in `/opt/venv` with its test group. Run `python -m pytest tests`. Most tests use
@@ -60,8 +54,6 @@ The checkout is at `/src`, installed in `/opt/venv` with its test group. Run `py
 Build a temporary project with one configuration file, controlled parent directories and placeholder secrets. Assert on
 the child process environment and header output. Cover INI and TOML as distinct cases because their syntax and defaults
 differ. Restore the parent environment after each test.
-
-
 
 ## Severity
 
@@ -73,8 +65,6 @@ differ. Restore the parent environment after each test.
   output.
 - Low: a crash, incorrect assignment or unexpected precedence confined to the test process, with no privilege or
   confidentiality boundary.
-
-
 
 ## Reports and exclusions
 
