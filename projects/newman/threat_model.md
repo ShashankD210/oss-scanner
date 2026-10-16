@@ -4,7 +4,7 @@
 - Newman is the command line runner for Postman collections. It is often used in CI pipelines.
 
 ## Trust model
-- Collections, environments, globals, data files, and the scripts inside them are trusted. The user chose to run them, just like running their own code. Anything a script does with the access it has, including escaping the script sandbox, is not a vulnerability.
+- Collections, environments, globals, data files, and the scripts inside them are trusted. The user chose to run them, just like running their own code. Anything a script does through the access the pm API gives it is not a vulnerability. Sandbox escapes are bugs in postman-sandbox or uvm, so report them against those projects, not this one.
 - The untrusted side is the network: HTTP responses (status, headers, body, cookies, redirects) and any server the collection talks to.
 
 ## Components that matter most
@@ -24,7 +24,7 @@
 - Every report must include a working reproducer against the current default branch. Without one, cap the severity at low.
 
 ## Anything to leave alone
-- Anything that needs a hostile collection, environment, data file, or script. These are trusted, so sandbox escapes, prototype pollution from collection JSON, and file reads by scripts are out of scope.
+- Anything that needs a hostile collection, environment, data file, or script. These are trusted, so prototype pollution from collection JSON and file reads by scripts are out of scope. Sandbox escapes belong to postman-sandbox and uvm.
 - Code under test/, examples/, benchmark/, and npm/ build scripts.
 - Known CVEs in dependencies, unless our code calls the vulnerable path in a reachable way from a server response.
 - Missing hardening with no attack path, such as missing headers or generic best practices.
