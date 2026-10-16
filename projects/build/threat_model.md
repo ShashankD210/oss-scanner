@@ -1,7 +1,5 @@
 # Threat model
 
-
-
 ## What build does and where untrusted input enters
 
 build is the PyPA frontend for building source distributions and wheels from PEP 517 projects. `ProjectBuilder` reads
@@ -28,8 +26,6 @@ Inputs worth treating as hostile are:
 pip, uv, `venv`, `pyproject-hooks` and the selected backend have separate security boundaries. Attribute a report to
 build only when its validation, path handling or invocation makes the defect reachable.
 
-
-
 ## Components to prioritize
 
 Start with `src/build/_builder.py`. Review `_parse_build_system_table`, backend-path validation, dependency checks,
@@ -50,8 +46,6 @@ trusted backend code, but still check whether build adds an unsafe extraction or
 Tests and documentation are useful fixtures. Release and CI automation are outside the installed frontend unless a
 production code path shares the defect.
 
-
-
 ## How to exercise the image
 
 The checkout is at `/src`; the image installs build and its test dependencies in `/opt/venv` and places a wheel under
@@ -61,8 +55,6 @@ The checkout is at `/src`; the image installs build and its test dependencies in
 Use a minimal source tree and backend for a security reproducer. Make one hook return the crafted requirement, metadata
 path or artifact name, then call the public `ProjectBuilder` API or `python -m build`. Record the runner arguments and
 filesystem before and after the call. Use local wheels or a mocked installer because the scan is offline.
-
-
 
 ## Severity
 
@@ -74,8 +66,6 @@ filesystem before and after the call. Use local wheels or a mocked installer bec
   artifact from the wrong directory or invocation; or cleanup escapes a caller-supplied temporary root.
 - Low: a controlled exception, hang, misleading diagnostic or invalid artifact with no demonstrated confidentiality or
   integrity impact.
-
-
 
 ## Reports and exclusions
 
