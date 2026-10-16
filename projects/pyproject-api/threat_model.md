@@ -3,8 +3,6 @@
 The authoritative reporting policy is `.github/SECURITY.md`. It supports the latest release and accepts private reports
 through GitHub.
 
-
-
 ## What pyproject-api does and where untrusted input enters
 
 pyproject-api reads PEP 517 build-system configuration and communicates with the selected backend through either a
@@ -30,8 +28,6 @@ Inputs to test include:
 pyproject-api returns requirements to the caller without installing them. The caller decides how to provision a backend
 and where to place artifacts.
 
-
-
 ## Components to prioritize
 
 Start with `src/pyproject_api/_frontend.py`. `create_args_from_folder` and `_in_tree_path` enforce the PEP 517 rule that
@@ -53,8 +49,6 @@ JSON type confusion, output decoding, hangs and persistent-backend state crossin
 `_check_metadata_dir` must not erase the project root or follow a caller-controlled alias while removing a directory
 tree.
 
-
-
 ## How to exercise the image
 
 The project is at `/src`, installed in editable mode in `/opt/venv`; test dependencies and a wheel are available
@@ -64,8 +58,6 @@ frontend implementations.
 Write a minimal backend that returns one crafted value or produces one crafted wheel, then invoke only the public
 `Frontend` API. Record the project and output trees, hook sequence, response JSON and returned `Path`. Run persistent
 and fresh-subprocess variants because their protocol lifetimes differ.
-
-
 
 ## Severity
 
@@ -78,8 +70,6 @@ and fresh-subprocess variants because their protocol lifetimes differ.
   process exits.
 - Low: a controlled exception, bounded hang, invalid result or leftover file confined to the backend's temporary or
   output directory.
-
-
 
 ## Reports and exclusions
 
