@@ -1,6 +1,6 @@
 # Fern — Android system monitor (optional Shizuku/root elevated diagnostics)
 repo: https://github.com/wized2/Fern#main
-primary_contact: wa0026343@gmail.com
+primary_contact: acartoon766@gmail.com
 homepage: https://get-fern.vercel.app
 disabled: false
 dockerfile: .oss-scanner/Dockerfile
