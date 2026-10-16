@@ -40,9 +40,10 @@ WORKDIR /src
 # "prepare" hook (it needs a git checkout), then the two allow-listed native deps are rebuilt.
 RUN pnpm install --frozen-lockfile --ignore-scripts && pnpm rebuild esbuild @parcel/watcher
 
-# Generate the frontend assets the desktop app serves (design-token CSS, UnoCSS output and the
-# CodeMirror bundle), i.e. the beforeBuildCommand work of a real Tauri build.
-RUN pnpm --filter @zephyr/desktop build:css && pnpm --filter @zephyr/desktop build:cm6
+# Generate the frontend assets the desktop app serves (design-token CSS and UnoCSS output),
+# i.e. the beforeBuildCommand work of a real Tauri build. The CodeMirror bundle
+# (src/cm6.bundle.js) is committed in the repository, so it needs no build step here.
+RUN pnpm --filter @zephyr/desktop build:css
 
 # Build the whole Rust workspace in the dev profile (debug info on, like CI's debug test
 # profile). This builds the zephyr desktop binary and every workspace crate and test target.
