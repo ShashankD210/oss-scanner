@@ -1,0 +1,3 @@
+# GitGrove, task-scoped git worktrees. The Dockerfile sits next to this file.
+repo: https://github.com/catdevman/gitgrove#main
+primary_contact: catdevman@gmail.com
