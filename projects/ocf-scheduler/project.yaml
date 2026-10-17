@@ -1,0 +1,5 @@
+# ocf-scheduler: cron-style scheduling of tasks and HTTP calls for Cloud Foundry apps.
+# The Dockerfile and threat_model.md sit next to this file, so neither key is set here.
+repo: https://github.com/cloudfoundry-community/ocf-scheduler#develop
+primary_contact: nabramovitz@fivetwenty.io
+homepage: https://github.com/cloudfoundry-community/ocf-scheduler
