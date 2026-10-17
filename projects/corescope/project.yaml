@@ -1,0 +1,7 @@
+# CoreScope: a local macOS monitor for developers (processes, ports, containers, coding-agent sessions), with a
+# Rust core and a SwiftUI app. The image builds the portable Rust on Linux; threat_model.md explains the rest.
+repo: https://github.com/Tiagospem/corescope#main
+primary_contact: tiago@leilotech.com.br
+homepage: https://github.com/Tiagospem/corescope
+dockerfile: .oss-scanner/Dockerfile
+threat_model: .oss-scanner/threat_model.md
