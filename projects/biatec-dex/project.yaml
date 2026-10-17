@@ -1,0 +1,7 @@
+repo: https://github.com/scholtz/BiatecCLAMM#main
+primary_contact: scholtz-oss-scanner@biatec.io
+auto_ccs:
+  - ccs-oss-scanner@biatec.io
+homepage: https://dex.biatec.io
+dockerfile: .oss-scanner/Dockerfile
+threat_model: .oss-scanner/threat_model.md
