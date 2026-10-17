@@ -1,0 +1,5 @@
+# ocf-scheduler-cf-plugin: the cf CLI plugin for the OCF Scheduler API.
+# The Dockerfile and threat_model.md sit next to this file, so neither key is set here.
+repo: https://github.com/cloudfoundry-community/ocf-scheduler-cf-plugin#develop
+primary_contact: nabramovitz@fivetwenty.io
+homepage: https://github.com/cloudfoundry-community/ocf-scheduler-cf-plugin
