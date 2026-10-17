@@ -1,0 +1,5 @@
+# Unofficial Python API and `brisk` CLI for BRiSK auction data, with a private cloud archive and query API.
+repo: https://github.com/honvl/BRiSKapi#main
+primary_contact: honvly@gmail.com
+homepage: https://honvl.github.io/BRiSKapi/
+disabled: false
