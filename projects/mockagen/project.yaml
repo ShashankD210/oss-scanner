@@ -1,0 +1,3 @@
+# Mockagen, a local data generator. The Dockerfile sits next to this file.
+repo: https://github.com/catdevman/mockagen#main
+primary_contact: catdevman@gmail.com
