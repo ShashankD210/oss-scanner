@@ -1,0 +1,10 @@
+# LIA, a self-hosted personal assistant: FastAPI + LangGraph backend, Next.js frontend, native mobile shells.
+repo: https://github.com/jgouviergmail/LIA-Assistant#main
+
+primary_contact: jgouvier@gmail.com
+
+homepage: https://lia.jeyswork.com/
+
+disabled: false
+
+# The Dockerfile and threat_model.md sit next to this file.
