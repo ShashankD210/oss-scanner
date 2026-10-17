@@ -1,0 +1,5 @@
+# Sounio: an epistemic systems language for scientific computing (uncertainty, units, effects) with a self-hosted compiler.
+repo: https://github.com/Sounio-lang/sounio#main
+primary_contact: demetrios@agourakis.med.br
+homepage: https://www.souniolang.org
+disabled: false
