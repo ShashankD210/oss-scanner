@@ -1,0 +1,6 @@
+repo: https://github.com/pdfluent/pdfluent-sdk#main
+primary_contact: hello@pdfluent.com
+homepage: https://pdfluent.com
+disabled: false
+dockerfile: .oss-scanner/Dockerfile
+threat_model: .oss-scanner/threat_model.md
