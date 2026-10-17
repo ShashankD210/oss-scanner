@@ -1,0 +1,7 @@
+# Offline MCP server that parses untrusted ArduPilot DataFlash flight logs for LLM clients.
+repo: https://github.com/furkanisikay/ardupilot-mcp#main
+primary_contact: contact@furkanisikay.com
+homepage: https://github.com/furkanisikay/ardupilot-mcp
+disabled: false
+dockerfile: .oss-scanner/Dockerfile
+threat_model: .oss-scanner/threat_model.md
