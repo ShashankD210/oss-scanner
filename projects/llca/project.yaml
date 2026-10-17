@@ -1,0 +1,15 @@
+# llca: local, private journal of what coding agents (Codex, Claude Code) do on a computer.
+# It reads attacker-influenced input from AI agents (prompt injection) on every tool call,
+# redacts secrets before storing it, and serves a local dashboard.
+
+repo: https://github.com/llca-ai/llca#main
+
+primary_contact: REPLACE_WITH_YOUR_EMAIL
+
+homepage: https://llca-ai.github.io/llca/
+
+disabled: false
+
+dockerfile: .oss-scanner/Dockerfile
+
+threat_model: .oss-scanner/threat_model.md
