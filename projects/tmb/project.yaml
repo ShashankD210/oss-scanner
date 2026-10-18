@@ -1,0 +1,10 @@
+# TMB plugin — an agentic engineering harness for Claude Code (MIT).
+# Branch main is what users install from the marketplace.
+repo: https://github.com/trustmybot/plugin#main
+
+# Security contact, as published in the repository's SECURITY.md.
+primary_contact: trustmybot@gmail.com
+
+homepage: https://github.com/trustmybot/plugin
+
+disabled: false
