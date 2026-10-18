@@ -1,0 +1,7 @@
+# Python library for per-user micro-services (actors) speaking the ActingWeb REST protocol, with OAuth2 and per-actor MCP servers.
+repo: https://github.com/actingweb/actingweb#master
+primary_contact: support@actingweb.io
+homepage: https://actingweb.org
+disabled: false
+dockerfile: .oss-scanner/Dockerfile
+threat_model: .oss-scanner/threat_model.md
