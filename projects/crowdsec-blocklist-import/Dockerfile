@@ -4,4 +4,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends git \
 COPY . /src
 WORKDIR /src
 RUN pip install --no-cache-dir -r requirements.txt pytest
-RUN python -m pytest -q || echo "WARNING: pytest reported failures"
+# The repo's own .dockerignore excludes *.md docs and test_blocklist_import.py from the
+# build context, so the release-metadata tests (which read ROADMAP.md) cannot run in this
+# image; run everything else.
+RUN python -m pytest -q --ignore=test_release_metadata.py || echo "WARNING: pytest reported failures"
