@@ -1,0 +1,7 @@
+# SSHSpan: a cross-platform desktop SSH key manager, SSH terminal and SFTP client (Rust, Tauri v2).
+# The Dockerfile and threat_model.md live in the project's own repository, under .oss-scanner/, so they can change without a PR here.
+repo: https://github.com/AGSQ11/SSHSpan#main
+primary_contact: andrei@cojan.ro
+homepage: https://github.com/AGSQ11/SSHSpan
+dockerfile: .oss-scanner/Dockerfile
+threat_model: .oss-scanner/threat_model.md
