@@ -1,0 +1,5 @@
+# OSS-Scanner-Anmeldung fuer setheerwagen/local-ai-mcp-servers
+# (beide MCP-Server, mcp-modelmanager + mcp-ollama-vllm, liegen in EINEM Repo)
+repo: https://github.com/setheerwagen/local-ai-mcp-servers
+primary_contact: siggi.seth@gmail.com
+homepage: https://sethki.de
