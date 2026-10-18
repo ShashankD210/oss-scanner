@@ -1,0 +1,7 @@
+# BioPAIthon, a fork of Biopython: tools for computational molecular biology.
+repo: https://github.com/dbolser/BioPAIthon
+primary_contact: dan.bolser@gmail.com
+homepage: https://github.com/dbolser/BioPAIthon/
+disabled: false
+dockerfile: .oss-scanner/Dockerfile
+threat_model: .oss-scanner/threat_model.md
