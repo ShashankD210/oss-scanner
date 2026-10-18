@@ -1,0 +1,8 @@
+# Oikonome — self-hosted personal finance (Python/FastAPI server, React web app, Expo mobile app).
+repo: https://github.com/oikonome/oikonome#main
+primary_contact: security@oikonome.com
+auto_ccs:
+  - tjp@oikonome.com
+homepage: https://oikonome.com
+disabled: false
+# The Dockerfile and threat_model.md sit next to this file.
