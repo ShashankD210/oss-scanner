@@ -42,10 +42,10 @@ RUN cargo build --locked --manifest-path rust/Cargo.toml \
 # Python code and Rust sources, build artifacts and Cargo caches remain in
 # the image. HOL Guard's own .dockerignore excludes the top-level tests/
 # directory, but Rust unit tests and crate fixtures remain in rust/crates/.
-RUN .venv/bin/python -c "import codex_plugin_scanner" \
-    && cargo test --locked --manifest-path rust/Cargo.toml \
+RUN .venv/bin/python -c "import codex_plugin_scanner"
+RUN cargo test --locked --manifest-path rust/Cargo.toml \
       -p guard-scanner --lib \
-    || echo "WARNING: Python import or Rust library smoke test failed"
+    || echo "WARNING: Rust library smoke tests reported failures"
 
 # Prevent accidental dependency downloads during interactive offline analysis.
 ENV CARGO_NET_OFFLINE=true \
