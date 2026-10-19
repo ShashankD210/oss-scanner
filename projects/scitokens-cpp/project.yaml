@@ -1,0 +1,8 @@
+# master is the development branch, and releases are tagged from it
+repo: https://github.com/scitokens/scitokens-cpp#master
+
+primary_contact: dweitzel@unl.edu
+
+homepage: https://scitokens.org
+
+disabled: false
