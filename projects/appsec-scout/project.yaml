@@ -1,0 +1,6 @@
+repo: https://github.com/metanull/appsec-scout-2#main
+primary_contact: metanull.appsec+appsec-scout@gmail.com
+homepage: https://github.com/metanull/appsec-scout-2
+disabled: false
+dockerfile: .oss-scanner/Dockerfile
+threat_model: .oss-scanner/threat_model.md
