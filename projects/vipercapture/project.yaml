@@ -1,0 +1,6 @@
+# ViperCapture: self-hosted browser rendering API.
+# Python 3.11+ (the image uses 3.12, matching the project's Dockerfile) and a TypeScript frontend.
+repo: https://github.com/Viperisuseful/ViperCapture#master
+primary_contact: viperisuseful@gmail.com
+homepage: https://github.com/Viperisuseful/ViperCapture
+disabled: false
