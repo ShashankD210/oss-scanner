@@ -49,8 +49,8 @@ From least to most privileged:
 8. **Instance operator**: an address listed in `INSTANCE_OPERATOR_EMAILS`, guarded by
    `backend/src/guards/instance-operator.guard.ts`. Fully trusted, like anyone with shell or database access.
 
-On a default install anyone can sign up, so an attacker usually has a company of their own where they are OWNER. The boundaries that
-matter:
+On a default install anyone can sign up, so an attacker usually has a company of their own where they are OWNER.
+The boundaries that matter:
 
 - **Company**: no user, API key or client of one company may read or change another company's data. This is the
   main boundary, and the one a self-registered attacker attacks first.
@@ -134,7 +134,7 @@ for PDF rendering.
 - More users: `POST /api/auth/sign-up/email`, as `/src/e2e/load/seed.js` does. To test roles, invite a second user
   into a company through `/api/invitations` as its OWNER.
 - Database: `psql postgresql://invoicerr:invoicerr@127.0.0.1:5432/invoicerr_db`, to set up data or observe a result.
-- Unit tests: `cd /src/backend && npm test` (Vitest).
+- Unit tests: run `invoicerr-start` first (they need the database), then `cd /src/backend && npm test` (Vitest).
 
 To show a cross-company issue, act as the user of the first company on a record id of the second. Run a positive
 control as the same user in the same run: a 403 or 404 can come from a check unrelated to the one under test. Prove
