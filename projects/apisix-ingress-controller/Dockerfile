@@ -14,9 +14,12 @@ RUN go mod download
 RUN go build -mod=readonly -o bin/apisix-ingress-controller cmd/main.go
 RUN make envtest
 # The upstream-pinned setup tool defaults to the retired GCS bucket.
-RUN mkdir -p /opt/envtest \
-    && bin/setup-envtest --use-deprecated-gcs=false use 1.30.0 \
-       --bin-dir /opt/envtest -p path > /opt/envtest-path
+RUN set -eu; mkdir -p /opt/envtest; \
+    for attempt in 1 2 3; do \
+        if bin/setup-envtest --use-deprecated-gcs=false use 1.30.0 \
+            --bin-dir /opt/envtest -p path > /opt/envtest-path; then exit 0; fi; \
+    done; \
+    exit 1
 
 # The repository's AGENTS.md points to this shared, externally maintained model.
 # Cache the documentation during setup so the audit can consult it offline.
