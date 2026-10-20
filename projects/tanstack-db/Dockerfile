@@ -2,7 +2,7 @@
 # Build context is the upstream repository, NOT the enrollment repository.
 FROM node:24.8.0-bookworm@sha256:82a1d74c5988b72e839ac01c5bf0f7879a8ffd14ae40d7008016bca6ae12852b
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates git python3 make g++ pkg-config \
+    ca-certificates git python3 make g++ pkg-config sqlite3 \
     && rm -rf /var/lib/apt/lists/*
 RUN npm install --global pnpm@11.1.0
 ENV CI=true NX_DAEMON=false NX_NO_CLOUD=true HUSKY=0
