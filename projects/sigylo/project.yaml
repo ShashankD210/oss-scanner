@@ -1,0 +1,7 @@
+# Sigylo: end-to-end encrypted, post-quantum hybrid secret sharing (Rust/Wasm client, Cloudflare Worker blind relay).
+# The Dockerfile and threat_model.md live in the repository, at the paths below.
+repo: https://github.com/pietrangelo/Sigylo#main
+primary_contact: privacy@sigylo.net
+homepage: https://sigylo.net
+dockerfile: .oss-scanner/Dockerfile
+threat_model: .oss-scanner/threat_model.md
