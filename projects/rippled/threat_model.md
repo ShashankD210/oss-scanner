@@ -113,20 +113,20 @@ Out of scope, or not what we mean by security:
 
 The checkout is `/src`; `git -C /src rev-parse HEAD` names the commit under scan. **Everything runs offline,
 and the binaries were built inside rippled's pinned Nix dev shell, so run them from inside that shell:** prefix
-commands with `nix develop --command` and run from `/src`. For an interactive session:
+commands with `nix develop .#gcc-plain --command` and run from `/src`. For an interactive session:
 
 ```
-cd /src && nix develop        # drops you into the toolchain shell; the build is in /src/.build
+cd /src && nix develop .#gcc-plain   # drops you into the toolchain shell; the build is in /src/.build
 ```
 
 The server binary is `/src/.build/xrpld` (a Release build with `-g1 -fno-omit-frame-pointer` and
 `-Dassertions=ON`, so `XRPL_ASSERT` invariant checks are compiled in; the unit tests are not built). Useful entry points:
 
-- **Standalone mode.** `nix develop --command ./.build/xrpld -a --conf <cfg> --start` runs a single-node ledger
+- **Standalone mode.** `nix develop .#gcc-plain --command ./.build/xrpld -a --conf <cfg> --start` runs a single-node ledger
   with no network, so a crafted transaction or RPC call can be driven end to end offline.
 - **A targeted reproducer.** Link a small C++ program against `libxrpl` from the build (headers under
   `/src/include/xrpl`, the library and objects in `/src/.build`) to feed bytes straight into `SerialIter` /
-  `STObject` / `STAmount` parsing or the crypto routines. Build it inside `nix develop` so the toolchain and
+  `STObject` / `STAmount` parsing or the crypto routines. Build it inside `nix develop .#gcc-plain` so the toolchain and
   the Conan-provided dependencies match.
 
 Where novel bugs are most likely: the byte-level parsers (`STObject`/`STArray`/`STAmount`/`SerialIter`, the
@@ -219,7 +219,7 @@ Report these, rated Low or as a non-security bug, without inflating them:
 ## How we would like reports and patches to look
 
 - One finding per report, with the commit (`git -C /src rev-parse HEAD`) and the exact command, run inside
-  `nix develop`. Prefer a reproducer that is one of: a standalone-mode command sequence, a small program against
+  `nix develop .#gcc-plain`. Prefer a reproducer that is one of: a standalone-mode command sequence, a small program against
   `libxrpl`, a standalone-mode (`-a`) transaction or RPC call, or a peer/protobuf message with the raw bytes.
   Include the sanitizer/gdb/assert output.
 - State **who controls the input and through which entry point it arrives** (an overlay peer? a submitted
