@@ -1,7 +1,7 @@
 # Threat model: AI Segmentation (QGIS plugin)
 
 ## What this project does and where untrusted input enters
-A QGIS plugin (about 72,000 downloads on plugins.qgis.org) that segments objects in rasters with SAM models, locally or through the TerraLab cloud API. It runs inside the user's QGIS process with their file system access. Treat as untrusted:
+A QGIS plugin (about 72,000 downloads on plugins.qgis.org) that segments objects in rasters with AI segmentation models, locally or through the TerraLab cloud API. It runs inside the user's QGIS process with their file system access. Treat as untrusted:
 - Raster and vector files the user opens (GeoTIFF, VRT, remote COG and XYZ/WMS tiles), including file names and layer metadata.
 - Every HTTP response: TerraLab API replies (api.terra-lab.ai), model checkpoint downloads, the standalone Python and pip downloads done by the venv bootstrap.
 - Archives the plugin extracts (src/core/archive_utils.py, src/core/streamed_download.py): path traversal, symlinks, size bombs.
