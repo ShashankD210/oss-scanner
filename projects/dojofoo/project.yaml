@@ -1,0 +1,6 @@
+# dojofoo: a local, agent-guided coding dojo. A CLI (`dojofoo`) installs courses of small exercises ("katas") and runs a
+# local web app where an AI coding agent teaches each lesson; an authoring workspace lets course authors write courses
+# with an agent. The Dockerfile and threat_model.md sit next to this file, so neither key is set here.
+repo: https://github.com/dojofoo/dojofoo#main
+primary_contact: security@dojo.foo
+homepage: https://dojo.foo
