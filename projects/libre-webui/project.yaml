@@ -1,0 +1,6 @@
+repo: https://github.com/libre-webui/libre-webui#dev
+primary_contact: security@kroonen.ai
+homepage: https://librewebui.org
+disabled: false
+dockerfile: .oss-scanner/Dockerfile
+threat_model: .oss-scanner/threat_model.md
