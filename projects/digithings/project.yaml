@@ -1,0 +1,20 @@
+# Enrollment for Anthropic's OSS Scanner: https://red.anthropic.com/oss-scanner/
+#
+# digithings is a self-hosted agent platform: an OpenAI-compatible orchestration
+# API in front of an auth plane, a RAG/search service, a web-fetch engine and a
+# quant backtesting service. The components we most want scanned are the ones
+# that turn untrusted input - chat text, retrieved documents, fetched HTML, JWT
+# and API-key headers, MCP tool arguments - into authenticated service-to-service
+# calls, tool invocations and audit records. See threat_model.md next to this file.
+
+repo: https://github.com/digithings-ai/digithings#develop
+
+# Core maintainer of the project; reports and questions come here.
+primary_contact: chris.stefan@gmail.com
+
+homepage: https://digithings.ai
+
+disabled: false
+
+# Dockerfile and threat_model.md are next to this file, so `dockerfile:` and
+# `threat_model:` are omitted.
