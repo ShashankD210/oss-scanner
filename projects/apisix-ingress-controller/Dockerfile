@@ -10,11 +10,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY . /src
 WORKDIR /src
 
-RUN go mod download \
-    && go build -mod=readonly -o bin/apisix-ingress-controller cmd/main.go \
-    && make envtest \
-    && mkdir -p /opt/envtest \
-    && bin/setup-envtest use 1.30.0 --bin-dir /opt/envtest -p path > /opt/envtest-path
+RUN go mod download
+RUN go build -mod=readonly -o bin/apisix-ingress-controller cmd/main.go
+RUN make envtest
+# The upstream-pinned setup tool defaults to the retired GCS bucket.
+RUN mkdir -p /opt/envtest \
+    && bin/setup-envtest --use-deprecated-gcs=false use 1.30.0 \
+       --bin-dir /opt/envtest -p path > /opt/envtest-path
 
 # The repository's AGENTS.md points to this shared, externally maintained model.
 # Cache the documentation during setup so the audit can consult it offline.
