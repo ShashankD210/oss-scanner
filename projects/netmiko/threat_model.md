@@ -61,7 +61,7 @@ prerequisite and demonstrate an impact beyond Netmiko returning unexpected outpu
 SSH host-key checking is configurable and is not enabled by default for compatibility; Telnet is an
 available, unencrypted transport still used in the network world.
 
-When reporting concerns about these behaviors, state the relevant configuration and concrete impact. 
-Session logs may contain sensitive network device data, including configurations, so consider whether 
+When reporting concerns about these behaviors, state the relevant configuration and concrete impact.
+Session logs may contain sensitive network device data, including configurations, so consider whether
 a finding is an implementation flaw or a consequence of the caller's logging configuration.
 
