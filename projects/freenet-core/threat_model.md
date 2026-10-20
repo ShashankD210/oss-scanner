@@ -50,7 +50,7 @@ Out of scope: `crates/netcheck`, `crates/release-agent`, `crates/replay-harness`
 The toolchain is pinned in `rust-toolchain.toml` (1.94.0, with the `wasm32-unknown-unknown` target). Integration tests compile the test contracts and delegates under `tests/` to WASM at run time (`crates/core/src/test_utils.rs`), so the image needs that target and their dependencies cached offline.
 
 - **Unit and integration tests**, as CI runs them (`.github/workflows/ci.yml`):
-  `cargo nextest run --workspace --exclude freenet-ping-types --no-default-features --features trace,websocket,redb,wasmtime-backend,testing --profile ci -E 'not test(blocked_peers)'`
+  `cargo nextest run --workspace --exclude freenet-ping-types --exclude freenet-ping-app --no-default-features --features trace,websocket,redb,wasmtime-backend,testing --profile ci -E 'not test(blocked_peers)'`
   The `ci` profile in `.config/nextest.toml` bounds slow tests. A few tests need the Internet (for example `tls_native_roots`, and anything that fetches the gateway list from freenet.org) and will fail offline.
 - **Deterministic network simulation** (many peers in one process on a simulated clock, good for reproducing peer-message bugs):
   `cargo nextest run -p freenet --lib --test simulation_integration --test simulation_smoke --test streaming_e2e --test state_verification -E 'kind(test) | (kind(lib) & test(sim_e2e_tests))' --features simulation_tests,testing --profile ci`
