@@ -20,7 +20,8 @@ COPY . /src
 WORKDIR /src
 
 # The runner/agent binaries (su-exec, jail, libbaihook, dropbear, ...) are Git LFS objects.
-RUN git lfs install --local && (git lfs pull || echo "WARNING: git lfs pull failed; runner binaries stay pointers")
+RUN (git lfs install --local --force && git lfs pull) \
+    || echo "WARNING: git lfs pull failed; runner binaries stay pointers"
 
 # Install the python-default resolve exactly as Pants pins it. python.lock is a uv lockfile whose root is a
 # virtual project named "pants-lockfile-for-python-default" built from requirements.txt, so recreate that
