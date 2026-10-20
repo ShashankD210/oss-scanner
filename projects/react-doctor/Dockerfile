@@ -19,5 +19,6 @@ RUN pnpm install --frozen-lockfile
 RUN pnpm build
 
 # Unit tests (vitest through turbo) for the CLI, core engine, API, both lint plugins, the fuzz harness and the evals.
-# Some evals and public-repo tests reach the network and are skipped or fail offline, so failures do not stop the build.
-RUN pnpm test --concurrency=1 || echo "WARNING: tests reported failures"
+# --continue runs every package's tests after one fails. Three tests are known to fail in this image: two in
+# react-doctor need the score API, and one in core expects a chmod 000 file to be unreadable, which root can still read.
+RUN pnpm test --continue --concurrency=1 || echo "WARNING: tests reported failures"
