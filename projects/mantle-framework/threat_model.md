@@ -35,7 +35,7 @@ Lower priority or out of scope:
 ## How to exercise it
 
 - Run `mantle-start` first to start MariaDB. `mantle-stop` stops it.
-- `vendor/bin/phpunit` from `/src` runs the suite; `vendor/bin/phpunit --filter <test>` or a path runs one test. `WP_MULTISITE=1` runs it under multisite. The bootstrap rsyncs `/src` into `/opt/wordpress/wp-content/plugins/mantle-framework` and runs PHPUnit there, so edits in `/src` take effect on the next run.
+- `vendor/bin/phpunit` from `/src` runs the suite; `vendor/bin/phpunit --filter <test>` or a path runs one test. `WP_MULTISITE=1` runs it under multisite. The bootstrap rsyncs `/src` into `/opt/wordpress/wp-content/plugins/src` and runs PHPUnit there, so edits in `/src` take effect on the next run.
 - Mantle's own testing framework is the best reproducer: tests extend `Mantle\Testing\FrameworkTestCase` (see `tests/`), can register routes, and can make requests with `$this->get( '/path' )->assertOk()`. A failing PHPUnit test in `tests/` is the preferred proof of concept.
 
 ## How you rate severity

@@ -5,7 +5,7 @@
 # /opt/wordpress   the WordPress install the test suite runs against, with its test library, the plugins the suite
 #                  loads, and a MariaDB database, all set up by a first run of the suite during this build
 #
-# Mantle's test bootstrap (tests/bootstrap.php) rsyncs /src into /opt/wordpress/wp-content/plugins/mantle-framework and
+# Mantle's test bootstrap (tests/bootstrap.php) rsyncs /src into /opt/wordpress/wp-content/plugins/src and
 # re-runs PHPUnit there, so edits made in /src are picked up on every run. Start MariaDB with `mantle-start` first.
 FROM php:8.4-cli-trixie
 
