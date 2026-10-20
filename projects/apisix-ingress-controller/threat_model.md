@@ -37,7 +37,7 @@ The full source is at `/src`, the controller binary is at
 installed. Local Kubernetes API server and etcd binaries for envtest are cached
 under `/opt/envtest`; their exact directory is in `/opt/envtest-path`.
 
-Run the prepared unit and envtest suites with:
+Run the prepared test package set with:
 
 ```sh
 timeout 900 oss-scanner-test
@@ -50,6 +50,17 @@ conformance, and benchmark packages are excluded. APISIX and ADC services are
 not running; use fake Kubernetes clients, envtest, and local HTTP fixtures to
 exercise controller behavior. Explicitly identify any finding whose end-to-end
 gateway impact still needs a live-backend reproduction.
+
+When writing an envtest reproducer in a network-disabled container, set the API
+server's advertised address to loopback before starting the environment:
+
+```go
+testEnv.ControlPlane.GetAPIServer().Configure().Set("advertise-address", "127.0.0.1")
+cfg, err := testEnv.Start()
+```
+
+Without this setting, kube-apiserver tries to discover a default network route
+and fails to start in a container that has only loopback connectivity.
 
 ## Reports
 
