@@ -42,10 +42,12 @@ RUN rustup toolchain install && rustc --version && cargo fetch --locked
 # The freenet and fdev binaries (into target/debug, which is on PATH), then every test binary, both with CI's test
 # features. freenet-ping-app is left out: its tests link a second freenet-stdlib, which current linkers reject
 # (https://github.com/freenet/freenet-core/issues/5950). A step that fails fails the build, and primary_contact gets
-# the log. Run the suite with:
+# the log. Incremental compilation is off for this step only: its cache is a third of target/ and makes the image slow
+# to export, while later rebuilds in the scanner still get it. Run the suite with:
 #   cargo nextest run --workspace --exclude freenet-ping-types --exclude freenet-ping-app \
 #     --no-default-features --features "$FREENET_FEATURES" --profile ci -E 'not test(blocked_peers)'
-RUN cargo build --locked --workspace --exclude freenet-ping-types --exclude freenet-ping-app \
+RUN export CARGO_INCREMENTAL=0 \
+    && cargo build --locked --workspace --exclude freenet-ping-types --exclude freenet-ping-app \
       --no-default-features --features "$FREENET_FEATURES" \
     && cargo nextest run --locked --workspace --exclude freenet-ping-types --exclude freenet-ping-app \
       --no-default-features --features "$FREENET_FEATURES" --no-run
