@@ -1,0 +1,7 @@
+# sbomlyze: SBOM diff and integrity-drift CLI plus GitHub Action. The Dockerfile and threat model live in the
+# repository under .oss-scanner/, so build changes do not need a pull request here.
+repo: https://github.com/rezmoss/sbomlyze#main
+primary_contact: hi@rezmoss.com
+homepage: https://github.com/rezmoss/sbomlyze
+dockerfile: .oss-scanner/Dockerfile
+threat_model: .oss-scanner/threat_model.md
