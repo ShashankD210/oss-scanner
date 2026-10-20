@@ -1,0 +1,13 @@
+# hive: a terminal multiplexer for coding agents (Go server and CLI on
+# libghostty-vt, macOS and Android clients).
+repo: https://github.com/manueltarouca/hive#main
+
+primary_contact: security@matm.xyz
+
+homepage: https://manueltarouca.github.io/hive/
+
+disabled: false
+
+dockerfile: .oss-scanner/Dockerfile
+
+threat_model: .oss-scanner/threat_model.md
