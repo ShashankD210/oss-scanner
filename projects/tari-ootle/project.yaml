@@ -1,0 +1,7 @@
+# Tari Ootle: a sharded smart-contract layer secured by the Minotari proof-of-work chain, with a BFT validator network,
+# a WASM template engine, an indexer and wallets.
+repo: https://github.com/tari-project/tari-ootle#development
+primary_contact: security@tari.com
+homepage: https://tari.com
+dockerfile: .oss-scanner/Dockerfile
+threat_model: .oss-scanner/threat_model.md
