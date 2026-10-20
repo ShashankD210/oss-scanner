@@ -1,0 +1,7 @@
+# Ruvio: a memory-first key-value store that speaks the Redis protocol (RESP2).
+# The Dockerfile and threat_model.md live in the Ruvio repository.
+repo: https://github.com/salihcantekin/ruvio#main
+primary_contact: pass.pansy5926@eagereverest.com
+homepage: https://ruviodb.com/
+dockerfile: .oss-scanner/Dockerfile
+threat_model: .oss-scanner/threat_model.md
