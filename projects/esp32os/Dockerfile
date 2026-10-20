@@ -1,5 +1,7 @@
 FROM espressif/idf:v5.3
 
+ENV IDF_COMPONENT_MANAGER=0
+
 COPY . /src
 WORKDIR /src
 
