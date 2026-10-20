@@ -24,6 +24,7 @@ RUN cmake -S /src -B /build -G Ninja \
       -DCMAKE_BUILD_TYPE=Debug -DWITH_DEBUG=1 \
       -DWITH_ASAN=1 -DWITH_UBSAN=1 \
       -DWITH_SSL=system -DWITH_ROUTER=OFF -DWITH_NUMA=OFF -DWITH_UNIT_TESTS=OFF \
+      -DWITH_NDB=OFF -DWITH_NDBCLUSTER_STORAGE_ENGINE=OFF \
     && cmake --build /build -j"$(nproc)"
 
 # Leak reports at shutdown are noise for this purpose; MTR sets its own *SAN_OPTIONS for the servers it starts.
