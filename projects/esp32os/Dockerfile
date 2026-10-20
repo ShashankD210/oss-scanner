@@ -1,4 +1,4 @@
-FROM espressif/idf:v5.2
+FROM espressif/idf:v5.3
 
 COPY . /src
 WORKDIR /src
