@@ -1,0 +1,6 @@
+repo: https://github.com/RushObservability/query-api#main
+primary_contact: mike@zcentric.com
+homepage: https://rushobservability.com
+disabled: false
+dockerfile: .oss-scanner/Dockerfile
+threat_model: .oss-scanner/threat_model.md
