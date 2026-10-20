@@ -26,6 +26,10 @@ RUN npm install --global "pnpm@$(node -p "require('./package.json').packageManag
     && node dist/apps/cli/main.cjs --help
 
 # Fetch and compile the Rust port, including test-only dependencies, while online.
+# Line tables support source debugging without exporting full debug/incremental caches.
+ENV CARGO_INCREMENTAL=0 \
+    CARGO_PROFILE_DEV_DEBUG=1 \
+    CARGO_PROFILE_TEST_DEBUG=1
 RUN cd rust \
     && cargo fetch --locked \
     && cargo build --workspace --locked \
