@@ -1,0 +1,5 @@
+repo: https://github.com/davlgd/wisegate#main
+primary_contact: me@davlgd.com
+homepage: https://github.com/davlgd/wisegate
+dockerfile: .oss-scanner/Dockerfile
+threat_model: .oss-scanner/threat_model.md
