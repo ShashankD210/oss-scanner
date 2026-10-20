@@ -1,0 +1,17 @@
+# Sam: a local voice agent for macOS that reads the user's email, chats, calendar, files and screen
+# context and acts on their accounts (sends messages, books, posts, fills forms) after approval.
+# Security-critical because untrusted web pages, emails and messages reach an LLM agent that holds
+# the user's sessions and Keychain secrets: an approval bypass or prompt-injection exfiltration
+# directly compromises the user's accounts and data.
+repo: https://github.com/elijahross/Sam---Local-conversational-agent#master
+
+# The security contact published in the repository's SECURITY.md.
+primary_contact: service@ml-canvas.com
+
+homepage: https://github.com/elijahross/Sam---Local-conversational-agent
+
+disabled: false
+
+# Both live in the repository, so changes to how Sam builds can update them too.
+dockerfile: .oss-scanner/Dockerfile
+threat_model: .oss-scanner/threat_model.md
