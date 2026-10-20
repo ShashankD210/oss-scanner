@@ -1,0 +1,5 @@
+repo: https://github.com/ray-di/Ray.Di#2.x
+primary_contact: akihito.koriyama@gmail.com
+homepage: https://ray-di.github.io
+dockerfile: .oss-scanner/Dockerfile
+threat_model: .oss-scanner/threat_model.md
