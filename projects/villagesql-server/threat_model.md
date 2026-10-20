@@ -62,7 +62,9 @@ Trusted:
   `./mysql-test-run.pl --parallel=2 villagesql/select.<test>` or `--suite=villagesql/<area>`. MTR copies the
   built `.veb` files into each test server. Shared helpers are in `mysql-test/include/villagesql/`. Wrap long runs
   in `timeout`.
-- Unit tests: `cd /build && ctest -L villagesql` (sources in `unittest/gunit/villagesql/`).
+- Unit tests (`unittest/gunit/villagesql/`) are not built in this image. To use them, reconfigure with
+  `cmake -S /src -B /build -DWITH_UNIT_TESTS=ON`, build the `villagesql-unit-tests` target, then run
+  `cd /build && ctest -L villagesql`. This is slow on two CPUs; prefer MTR tests.
 - `Docs/` and `villagesql/sdk/README.md` describe the SDK, ABI versions and conventions.
 
 ## How you rate severity
