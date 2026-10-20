@@ -7,7 +7,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates curl git python3 build-essential clang cmake pkg-config \
     protobuf-compiler libssl-dev libcurl4-openssl-dev \
     && rm -rf /var/lib/apt/lists/*
-RUN corepack enable && corepack prepare pnpm@9 --activate
+# Only enable pnpm: the Node image's Yarn links point outside /usr/local.
+RUN corepack enable pnpm && corepack prepare pnpm@9 --activate
 
 ENV CARGO_BUILD_JOBS=2 \
     CARGO_PROFILE_DEV_DEBUG=1 \
