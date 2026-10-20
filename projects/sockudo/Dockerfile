@@ -27,7 +27,12 @@ RUN cargo build --locked -p sockudo --features full
 # Compile (but do not run) every workspace test target so they are usable offline.
 RUN cargo test --locked --workspace --no-run
 
-# Smoke-run the unit tests only; integration tests that need live backends (Redis, Postgres,
-# NATS, ...) are left for later. Failures do not abort the build.
-RUN (timeout 2400 cargo test --locked --workspace --lib \
-      || echo "WARNING: sockudo unit tests reported failures")
+# Smoke-run the unit tests. A few of them need Redis on the default ports (6379, and 16379 /
+# REDIS_URL), so start local servers for the duration of this step. Integration tests that need
+# other live backends (Postgres, NATS, Redis Cluster, ...) are left for later. Failures do not
+# abort the build.
+RUN redis-server --port 6379 --daemonize yes --save "" --appendonly no \
+    && redis-server --port 16379 --daemonize yes --save "" --appendonly no \
+    && (timeout 2400 cargo test --locked --workspace --lib --no-fail-fast \
+          || echo "WARNING: sockudo unit tests reported failures"); \
+    redis-cli -p 6379 shutdown nosave; redis-cli -p 16379 shutdown nosave; true
