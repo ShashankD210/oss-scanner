@@ -1,0 +1,6 @@
+repo: https://github.com/alleyinteractive/mantle-framework#1.x
+primary_contact: opensource@alley.com
+auto_ccs:
+  - sean@alley.com
+homepage: https://mantle.alley.com
+disabled: false
