@@ -1,0 +1,7 @@
+# Zakura Common: the Zcash cryptography and protocol libraries Zakura is built on. https://zakura.com/
+repo: https://github.com/zakura-core/common
+primary_contact: ewillbefull@gmail.com
+homepage: https://zakura.com/
+disabled: false
+dockerfile: .oss-scanner/Dockerfile
+threat_model: .oss-scanner/threat_model.md
