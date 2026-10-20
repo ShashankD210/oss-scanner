@@ -4,6 +4,11 @@
 # build) and olcrtc_testhooks.
 FROM golang:1.26.3
 
+# iproute2: the tests that connect two pion peers need an interface besides lo, and a sandbox with
+# no network has none; `ip` adds a dummy one (.oss-scanner/threat_model.md, "How to exercise it").
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends iproute2 \
+    && rm -rf /var/lib/apt/lists/*
+
 # The checkout lives inside the image, at /src.
 COPY . /src
 WORKDIR /src
