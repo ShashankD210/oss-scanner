@@ -29,8 +29,11 @@ RUN go mod download \
     && (cd client && go mod download)
 
 # The normal build fetches protobuf sources, Conan packages and Rust crates.
-# Retain C++ test executables and debug symbols for local reproducers.
-RUN make build-cpp-with-unittest mode=RelWithDebInfo \
+# Use the standard Release dependency packages, keeping debug information in
+# Milvus itself rather than rebuilding every dependency in a different profile.
+ENV CFLAGS="-g1 -fno-omit-frame-pointer" \
+    CXXFLAGS="-g1 -fno-omit-frame-pointer"
+RUN make build-cpp-with-unittest mode=Release \
     && make build-go build-pyudf-runtime-wheel PYTHON=/src/.venv/bin/python
 
 ENV LD_LIBRARY_PATH=/src/internal/core/output/lib:/src/internal/core/output/lib64:/src/cmake_build/lib \
