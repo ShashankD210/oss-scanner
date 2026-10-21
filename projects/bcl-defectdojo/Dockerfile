@@ -6,9 +6,10 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      build-essential gcc git \
+      build-essential gcc git nasm \
       libpq-dev postgresql postgresql-client \
       libopenjp2-7 libjpeg62 libtiff6 xmlsec1 uuid-runtime \
+      libisal-dev \
       curl autoconf gettext zlib1g-dev libcurl4-openssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
