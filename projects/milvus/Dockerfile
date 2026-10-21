@@ -77,6 +77,8 @@ FROM native AS server
 
 RUN milvus-build-step /tmp/milvus-server-build.log \
     make build-go build-pyudf-runtime-wheel PYTHON=/src/.venv/bin/python
+RUN source /src/.venv/bin/activate \
+    && uv pip install cmake_build/runtime/pyudf/wheels/*.whl
 
 FROM server AS final
 
@@ -87,8 +89,10 @@ RUN source scripts/setenv.sh && set -e \
 
 # Tests run offline during the audit. Do not invoke make's download targets there.
 ENV GOPROXY=off GOSUMDB=off CARGO_NET_OFFLINE=true UV_OFFLINE=1
-RUN --network=none source scripts/setenv.sh && set -e \
+RUN --network=none source scripts/setenv.sh && source /src/.venv/bin/activate && set -e \
     && ./bin/milvus dry-run \
+    && PYUDF_TEST_INSTALLED_RUNTIME=1 python \
+        internal/util/function/pyudf/python/tests/test_installed_runtime.py -v \
     && go test -tags dynamic,test -gcflags="all=-N -l" -count=1 ./internal/parser/planparserv2 \
     && (cd pkg && go test -tags dynamic,test -gcflags="all=-N -l" -count=1 ./util/crypto) \
     && internal/core/output/unittest/all_tests --gtest_filter='StringExpr.Term:StringExpr.Compare'

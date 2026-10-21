@@ -64,6 +64,8 @@ From the offline shell:
 cd /src
 source scripts/setenv.sh
 ./bin/milvus dry-run
+source /src/.venv/bin/activate
+PYUDF_TEST_INSTALLED_RUNTIME=1 python internal/util/function/pyudf/python/tests/test_installed_runtime.py -v
 go test -tags dynamic,test -gcflags="all=-N -l" -count=1 ./internal/parser/planparserv2
 (cd pkg && go test -tags dynamic,test -gcflags="all=-N -l" -count=1 ./util/crypto)
 internal/core/output/unittest/all_tests --gtest_list_tests
@@ -71,8 +73,9 @@ internal/core/output/unittest/all_tests --gtest_list_tests
 internal/core/output/unittest/all_tests --gtest_filter='<suite>.*'
 ```
 
-The focused Go suites and the C++ `StringExpr.Term` and `StringExpr.Compare` tests
-are run in a network-disabled build step. The full suite is not run. Test sources in
+The focused Go suites, the installed PyUDF wheel probe and the C++
+`StringExpr.Term` and `StringExpr.Compare` tests run in a network-disabled build
+step. The full suite is not run. Test sources in
 `internal/proxy`, `internal/distributed/proxy/httpserver` and `tests/integration`
 provide further fixtures; tests needing etcd, object storage, messaging or model
 services require local fixtures. Those services are not started by this image.
