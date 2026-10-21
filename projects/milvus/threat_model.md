@@ -25,6 +25,13 @@ that requires access to that network, arbitrary metadata writes or host access.
 Do not assume that an API user controls an internal serialized query plan without
 showing how that plan can be produced through a reachable interface.
 
+PyUDF is opt-in and executes administrator-reviewed, trusted Python wheels. Its
+worker process is not a sandbox for malicious UDF code, and its separate gRPC
+endpoint belongs on loopback or a trusted network. See the trust-boundary section
+of `docs/design-docs/design_docs/20260722-pyudf-function-chain.md`. A finding must
+show an actual violation of these boundaries rather than code execution by an
+already trusted wheel.
+
 ## Priority surfaces
 
 - `internal/proxy` and `internal/distributed/proxy/httpserver`: authentication,
