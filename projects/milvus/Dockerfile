@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # Public CPU builder used by Milvus master in .env and docker-compose.yml.
-FROM milvusdb/milvus-env:ubuntu22.04-20261009-bcd6ade
+FROM milvusdb/milvus-env:ubuntu22.04-20261009-bcd6ade AS setup
 
 USER root
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -12,10 +12,6 @@ ENV DEBIAN_FRONTEND=noninteractive \
     CARGO_BUILD_JOBS=${BUILD_JOBS} \
     jobs=${BUILD_JOBS}
 
-# Keep source, compilers, native dependencies and package caches in the image.
-COPY . /src
-WORKDIR /src
-
 # Match the Conan version required by master, without modifying system Python.
 RUN uv tool install --python python3.12 conan==2.25.1 --force \
     && uv venv -p 3.12 /src/.venv \
@@ -23,37 +19,66 @@ RUN uv tool install --python python3.12 conan==2.25.1 --force \
     && uv pip install pip setuptools==80.9.0 wheel==0.45.1
 ENV PATH=/src/.venv/bin:/root/.cargo/bin:/usr/local/bin:/go/bin:/usr/local/go/bin:$PATH
 
+# Conan 2 reads tools.build:jobs rather than CONAN_CPU_COUNT.
+RUN mkdir -p "$CONAN_HOME" \
+    && printf 'tools.build:jobs=%s\n' "$BUILD_JOBS" >> "$CONAN_HOME/global.conf"
+
+# Keep full logs while printing bounded progress below BuildKit's output limit.
+COPY --chmod=0755 <<'EOF' /usr/local/bin/milvus-build-step
+#!/bin/bash
+set -uo pipefail
+logfile=$1
+shift
+printf 'Build step started; full log: %s\n' "$logfile"
+"$@" >"$logfile" 2>&1 &
+build_pid=$!
+while kill -0 "$build_pid" 2>/dev/null; do
+    tail -n 5 "$logfile" 2>/dev/null || true
+    sleep 30
+done
+wait "$build_pid"
+result=$?
+if [ "$result" -eq 0 ]; then
+    tail -n 20 "$logfile"
+else
+    tail -n 200 "$logfile"
+fi
+exit "$result"
+EOF
+
+# Keep the checkout and build caches. The injected scanner recipe is metadata;
+# excluding it lets recipe-only fixes reuse completed source build stages.
+COPY --exclude=.oss-scanner . /src
+WORKDIR /src
+
 # Download modules for the server, shared packages and Go client while online.
 RUN go mod download \
     && (cd pkg && go mod download) \
     && (cd client && go mod download)
 
-# The normal build fetches protobuf sources, Conan packages and Rust crates.
-# Use the standard Release dependency packages, keeping debug information in
-# Milvus itself rather than rebuilding every dependency in a different profile.
+FROM setup AS dependencies
+
+# Use standard Release dependency packages and retain Milvus debug information.
 ENV CFLAGS="-g1 -fno-omit-frame-pointer" \
     CXXFLAGS="-g1 -fno-omit-frame-pointer"
-# Conan 2 reads tools.build:jobs; retain full logs and print bounded progress.
-RUN set -e; \
-    mkdir -p "$CONAN_HOME"; \
-    printf 'tools.build:jobs=%s\n' "$BUILD_JOBS" >> "$CONAN_HOME/global.conf"; \
-    (make build-cpp-with-unittest mode=Release \
-        && make build-go build-pyudf-runtime-wheel PYTHON=/src/.venv/bin/python) \
-        > /tmp/milvus-build.log 2>&1 & \
-    build_pid=$!; \
-    while kill -0 "$build_pid" 2>/dev/null; do \
-        tail -n 5 /tmp/milvus-build.log 2>/dev/null || true; \
-        sleep 30; \
-    done; \
-    if wait "$build_pid"; then \
-        tail -n 20 /tmp/milvus-build.log; \
-    else \
-        tail -n 200 /tmp/milvus-build.log; \
-        exit 1; \
-    fi
+RUN milvus-build-step /tmp/milvus-dependencies.log \
+    make generated-proto plan-parser-lib mode=Release
+
+FROM dependencies AS native
+
+# The prerequisites were built in the previous stage; avoid fetching them again.
+RUN milvus-build-step /tmp/milvus-native-build.log \
+    make -o generated-proto -o plan-parser-lib build-cpp-with-unittest mode=Release
 
 ENV LD_LIBRARY_PATH=/src/internal/core/output/lib:/src/internal/core/output/lib64:/src/cmake_build/lib \
     PKG_CONFIG_PATH=/src/internal/core/output/lib/pkgconfig:/src/internal/core/output/lib64/pkgconfig
+
+FROM native AS server
+
+RUN milvus-build-step /tmp/milvus-server-build.log \
+    make build-go build-pyudf-runtime-wheel PYTHON=/src/.venv/bin/python
+
+FROM server AS final
 
 # Compile focused tests while downloads are still allowed. Fail on build errors.
 RUN source scripts/setenv.sh && set -e \
