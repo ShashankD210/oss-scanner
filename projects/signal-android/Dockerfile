@@ -26,10 +26,6 @@ RUN curl --proto '=https' --tlsv1.2 -fsSL -o /tmp/tools.zip \
     && sdkmanager "platform-tools" "platforms;android-37.0" "build-tools;36.0.0" \
       "ndk;28.0.13004108" "cmake;3.22.1" > /dev/null
 
-# gradle.properties asks for a 12 GB daemon heap; the scanner's VM may have less.
-RUN mkdir -p /root/.gradle \
-    && echo 'org.gradle.jvmargs=-Xmx6g -XX:MaxMetaspaceSize=1g' > /root/.gradle/gradle.properties
-
 # scanner contract: the checkout lives inside the image, at /src
 COPY . /src
 WORKDIR /src
