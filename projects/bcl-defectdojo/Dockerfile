@@ -1,29 +1,36 @@
 # OSS Scanner — bancolombia/django-DefectDojo (#trunk)
-# Use Debian + apt python3 so Anthropic's scanner layer (apt install python3) does not
-# conflict with /usr/local Python from the official python:* images.
+# - Debian base: Anthropic scanner layer can `apt install python3` (3.11) without breaking dpkg.
+# - Python 3.12 (backports): requirements.txt pins numpy 2.5.x / Django 6 which need >=3.12.
 FROM debian:bookworm
 ENV DEBIAN_FRONTEND=noninteractive \
     PYCURL_SSL_LIBRARY=openssl \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    PATH=/opt/venv/bin:/usr/local/bin:/usr/bin:/bin
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-      ca-certificates curl git bash procps \
-      python3 python3-pip python3-venv python3-dev \
-      build-essential gcc g++ nasm \
-      libpq-dev postgresql postgresql-client \
-      libopenjp2-7 libjpeg62 libtiff6 xmlsec1 uuid-runtime \
-      libisal-dev \
-      autoconf gettext zlib1g-dev libcurl4-openssl-dev pkg-config \
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl \
+    && echo "deb http://deb.debian.org/debian bookworm-backports main" \
+       > /etc/apt/sources.list.d/backports.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends -t bookworm-backports \
+         python3.12 python3.12-venv python3.12-dev \
+    && apt-get install -y --no-install-recommends \
+         python3 python3-venv \
+         git bash procps \
+         build-essential gcc g++ nasm \
+         libpq-dev postgresql postgresql-client \
+         libopenjp2-7 libjpeg62 libtiff6 xmlsec1 uuid-runtime \
+         libisal-dev \
+         autoconf gettext zlib1g-dev libcurl4-openssl-dev pkg-config \
     && rm -rf /var/lib/apt/lists/* \
-    && python3 -m venv /opt/venv \
+    && python3.12 -m venv /opt/venv \
     && /opt/venv/bin/pip install --upgrade pip
 
 COPY . /src
 WORKDIR /src
 RUN ln -sf /src /app
 
-RUN CPUCOUNT=1 pip3 wheel --wheel-dir=/tmp/wheels -r requirements.txt \
- && pip3 install --no-cache-dir --no-index --find-links=/tmp/wheels -r requirements.txt
+RUN CPUCOUNT=1 /opt/venv/bin/pip wheel --wheel-dir=/tmp/wheels -r requirements.txt \
+ && /opt/venv/bin/pip install --no-cache-dir --no-index --find-links=/tmp/wheels -r requirements.txt
 
 RUN cp docker/wait-for-it.sh docker/secret-file-loader.sh docker/reach_database.sh \
        docker/entrypoint-unit-tests.sh / \
