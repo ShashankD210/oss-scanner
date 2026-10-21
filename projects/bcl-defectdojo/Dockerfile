@@ -19,15 +19,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
  && uv python install 3.12 \
- && uv venv /opt/venv --python 3.12 \
- && /opt/venv/bin/pip install --upgrade pip
+ && uv venv /opt/venv --python 3.12
 
 COPY . /src
 WORKDIR /src
 RUN ln -sf /src /app
 
-RUN CPUCOUNT=1 /opt/venv/bin/pip wheel --wheel-dir=/tmp/wheels -r requirements.txt \
- && /opt/venv/bin/pip install --no-cache-dir --no-index --find-links=/tmp/wheels -r requirements.txt
+RUN CPUCOUNT=1 uv pip install --python /opt/venv/bin/python -r requirements.txt
 
 RUN cp docker/wait-for-it.sh docker/secret-file-loader.sh docker/reach_database.sh \
        docker/entrypoint-unit-tests.sh / \
@@ -56,10 +54,10 @@ ENV DD_DEBUG=True \
     DD_CREDENTIAL_AES_256_KEY=0123456789abcdef0123456789abcdef \
     DD_DATABASE_READINESS_TIMEOUT=120
 
-RUN service postgresql start \
+RUN pg_ctlcluster "$(ls /etc/postgresql)" main start \
  && su postgres -c "psql -v ON_ERROR_STOP=1 -c \"CREATE USER defectdojo WITH PASSWORD 'defectdojo';\"" \
  && su postgres -c "psql -v ON_ERROR_STOP=1 -c \"CREATE DATABASE test_defectdojo OWNER defectdojo;\"" \
- && /wait-for-it.sh 127.0.0.1:5432 -t 60 -- bash -c 'cd /app && python3 manage.py migrate --noinput' \
+ && /wait-for-it.sh 127.0.0.1:5432 -t 60 -- bash -c 'cd /app && /opt/venv/bin/python manage.py migrate --noinput' \
  && ( /wait-for-it.sh 127.0.0.1:5432 -t 60 -- /entrypoint-unit-tests.sh \
       || echo "WARNING: unit tests reported failures or timed out" )
 
