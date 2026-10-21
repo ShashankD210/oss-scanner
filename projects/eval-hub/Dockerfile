@@ -29,8 +29,11 @@ ENV GOPROXY=off \
     GOTOOLCHAIN=local
 
 # These integration tests provision MLflow/PostgreSQL even with -short.
+# BuildKit injects an OTLP endpoint; keep it out of the application's TLS tests.
 # Record other baseline failures without preventing the scanner from studying them.
-RUN timeout 1200 go test -race -short -timeout 10m \
+RUN env -u OTEL_EXPORTER_OTLP_ENDPOINT -u OTEL_EXPORTER_OTLP_TRACES_ENDPOINT \
+      -u OTEL_EXPORTER_OTLP_INSECURE -u OTEL_EXPORTER_OTLP_TRACES_INSECURE \
+      timeout 1200 go test -race -short -timeout 10m \
       -skip '^(TestMLFlowIntegration|TestGetEvaluationJobs_Postgres)$' \
       ./internal/... ./cmd/... ./pkg/... \
     || echo 'WARNING: baseline Go tests reported failures; inspect the build log'
