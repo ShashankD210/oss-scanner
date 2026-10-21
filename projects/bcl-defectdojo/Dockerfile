@@ -1,17 +1,22 @@
 # OSS Scanner — bancolombia/django-DefectDojo (#trunk)
-# Build context = full repo clone. Network only during `docker build`.
-FROM python:3.15.0rc3-slim-bookworm@sha256:ea93de1a70a03fffd10ad8cfde8f4ba969fe2658f0578af02855d1d32f49e6c2
+# Use Debian + apt python3 so Anthropic's scanner layer (apt install python3) does not
+# conflict with /usr/local Python from the official python:* images.
+FROM debian:bookworm
 ENV DEBIAN_FRONTEND=noninteractive \
     PYCURL_SSL_LIBRARY=openssl \
     PYTHONUNBUFFERED=1
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      build-essential gcc git nasm \
+      ca-certificates curl git bash procps \
+      python3 python3-pip python3-venv python3-dev \
+      build-essential gcc g++ nasm \
       libpq-dev postgresql postgresql-client \
       libopenjp2-7 libjpeg62 libtiff6 xmlsec1 uuid-runtime \
       libisal-dev \
-      curl autoconf gettext zlib1g-dev libcurl4-openssl-dev \
-    && rm -rf /var/lib/apt/lists/*
+      autoconf gettext zlib1g-dev libcurl4-openssl-dev pkg-config \
+    && rm -rf /var/lib/apt/lists/* \
+    && python3 -m venv /opt/venv \
+    && /opt/venv/bin/pip install --upgrade pip
 
 COPY . /src
 WORKDIR /src
