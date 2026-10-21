@@ -1,4 +1,2 @@
 repo: https://github.com/j4rviscmd/bilibili-downloader-gui
 primary_contact: j4rviscmd@gmail.com
-dockerfile: .oss-scanner/Dockerfile
-threat_model: .oss-scanner/threat_model.md
