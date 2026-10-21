@@ -1,0 +1,8 @@
+# PicoClaw: self-hosted personal AI assistant in Go. The scanner image and threat model live in the
+# project's repository at .oss-scanner/, so they can be updated without a pull request here.
+repo: https://github.com/afjcjsbx/picoclaw#main
+primary_contact: afjcjsbx@gmail.com
+homepage: https://github.com/afjcjsbx/picoclaw
+disabled: false
+dockerfile: .oss-scanner/Dockerfile
+threat_model: .oss-scanner/threat_model.md
