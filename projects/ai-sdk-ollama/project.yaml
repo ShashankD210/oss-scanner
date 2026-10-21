@@ -1,0 +1,15 @@
+# ai-sdk-ollama is the Vercel AI SDK provider for Ollama (~300k npm downloads a month). It parses
+# and repairs model output into tool calls and typed objects, maps responses from local or remote
+# Ollama servers, and carries API keys, so prompt-injected model output and hostile server replies
+# reach its parsers directly.
+repo: https://github.com/jagreehal/ai-sdk-ollama#main
+
+primary_contact: jag.reehal+security@gmail.com
+
+homepage: https://github.com/jagreehal/ai-sdk-ollama
+
+disabled: false
+
+dockerfile: .oss-scanner/Dockerfile
+
+threat_model: .oss-scanner/threat_model.md
