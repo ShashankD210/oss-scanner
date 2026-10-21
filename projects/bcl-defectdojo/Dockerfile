@@ -1,29 +1,26 @@
 # OSS Scanner — bancolombia/django-DefectDojo (#trunk)
-# - Debian base: Anthropic scanner layer can `apt install python3` (3.11) without breaking dpkg.
-# - Python 3.12 (backports): requirements.txt pins numpy 2.5.x / Django 6 which need >=3.12.
+# Debian bookworm: scanner layer can apt-install python3 (3.11) for Claude Code.
+# App deps need Python 3.12+ (numpy 2.5.x): install 3.12 with uv, not apt backports.
 FROM debian:bookworm
 ENV DEBIAN_FRONTEND=noninteractive \
     PYCURL_SSL_LIBRARY=openssl \
     PYTHONUNBUFFERED=1 \
-    PATH=/opt/venv/bin:/usr/local/bin:/usr/bin:/bin
+    PATH=/opt/venv/bin:/root/.local/bin:/usr/local/bin:/usr/bin:/bin
 
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl \
-    && echo "deb http://deb.debian.org/debian bookworm-backports main" \
-       > /etc/apt/sources.list.d/backports.list \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends -t bookworm-backports \
-         python3.12 python3.12-venv python3.12-dev \
-    && apt-get install -y --no-install-recommends \
-         python3 python3-venv \
-         git bash procps \
-         build-essential gcc g++ nasm \
-         libpq-dev postgresql postgresql-client \
-         libopenjp2-7 libjpeg62 libtiff6 xmlsec1 uuid-runtime \
-         libisal-dev \
-         autoconf gettext zlib1g-dev libcurl4-openssl-dev pkg-config \
-    && rm -rf /var/lib/apt/lists/* \
-    && python3.12 -m venv /opt/venv \
-    && /opt/venv/bin/pip install --upgrade pip
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      ca-certificates curl git bash procps \
+      python3 python3-venv \
+      build-essential gcc g++ nasm \
+      libpq-dev postgresql postgresql-client \
+      libopenjp2-7 libjpeg62 libtiff6 xmlsec1 uuid-runtime \
+      libisal-dev \
+      autoconf gettext zlib1g-dev libcurl4-openssl-dev pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
+ && uv python install 3.12 \
+ && uv venv /opt/venv --python 3.12 \
+ && /opt/venv/bin/pip install --upgrade pip
 
 COPY . /src
 WORKDIR /src
