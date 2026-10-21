@@ -88,6 +88,7 @@ RUN source scripts/setenv.sh && set -e \
 # Tests run offline during the audit. Do not invoke make's download targets there.
 ENV GOPROXY=off GOSUMDB=off CARGO_NET_OFFLINE=true UV_OFFLINE=1
 RUN --network=none source scripts/setenv.sh && set -e \
+    && ./bin/milvus dry-run \
     && go test -tags dynamic,test -gcflags="all=-N -l" -count=1 ./internal/parser/planparserv2 \
     && (cd pkg && go test -tags dynamic,test -gcflags="all=-N -l" -count=1 ./util/crypto) \
     && internal/core/output/unittest/all_tests --gtest_filter='StringExpr.Term:StringExpr.Compare'
