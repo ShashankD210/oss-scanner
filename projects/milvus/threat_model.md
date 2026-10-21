@@ -55,12 +55,15 @@ The Dockerfile builds the CPU server and C++ unit tests from the checkout at
 `/src`. The executable is `/src/bin/milvus`; native libraries and C++ test binaries
 are under `/src/internal/core/output`. Build trees and Go, Conan and Cargo caches
 are retained. GPU builds and external cloud services are not prepared.
+Full setup logs are retained as `/tmp/milvus-dependencies.log`,
+`/tmp/milvus-native-build.log` and `/tmp/milvus-server-build.log`.
 
 From the offline shell:
 
 ```bash
 cd /src
 source scripts/setenv.sh
+./bin/milvus dry-run
 go test -tags dynamic,test -gcflags="all=-N -l" -count=1 ./internal/parser/planparserv2
 (cd pkg && go test -tags dynamic,test -gcflags="all=-N -l" -count=1 ./util/crypto)
 internal/core/output/unittest/all_tests --gtest_list_tests
