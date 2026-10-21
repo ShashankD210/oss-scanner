@@ -1,0 +1,15 @@
+# autotel is an OpenTelemetry toolkit for Node, edge and browser (~15k npm downloads a month). It
+# captures request data into telemetry, applies redaction before export, parses incoming trace
+# context, and ships OTLP receivers with web UIs and an MCP server, so attacker-controlled request
+# data and network input reach its parsers, redaction and renderers.
+repo: https://github.com/jagreehal/autotel#main
+
+primary_contact: jag.reehal+security@gmail.com
+
+homepage: https://github.com/jagreehal/autotel
+
+disabled: false
+
+dockerfile: .oss-scanner/Dockerfile
+
+threat_model: .oss-scanner/threat_model.md
