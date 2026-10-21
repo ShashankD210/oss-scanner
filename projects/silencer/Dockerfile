@@ -35,6 +35,7 @@ RUN cd frontend && npm run build
 COPY <<'EOF' /usr/local/bin/silencer-test
 #!/usr/bin/env bash
 set -euo pipefail
+export PATH="/usr/local/go/bin:/go/bin:/usr/local/bin:$PATH"
 cd /src
 /opt/silencer-native/engine_test
 cd gateway
@@ -49,8 +50,5 @@ EOF
 RUN chmod +x /usr/local/bin/silencer-test \
     && (silencer-test > /opt/silencer-test-build.log 2>&1 \
         || { cat /opt/silencer-test-build.log; echo 'WARNING: tests reported failures; inspect /opt/silencer-test-build.log'; })
-ENV SILENCER_WEB_DIST=/src/frontend/dist \
-    SILENCER_EXTENSION_DISABLED=1 \
-    SILENCER_ENGINE=cpp
 WORKDIR /src
 CMD ["bash"]
