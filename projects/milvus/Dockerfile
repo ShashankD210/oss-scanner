@@ -91,8 +91,8 @@ RUN source scripts/setenv.sh && set -e \
     && (cd pkg && go test -tags dynamic,test -gcflags="all=-N -l" -run '^$' ./util/crypto)
 
 # Invoke the verified toolchain directly; auto-selection needs sumdb offline.
-RUN ln -s "$(go env GOROOT)/bin" /opt/milvus-go-bin
-ENV PATH=/opt/milvus-go-bin:$PATH GOTOOLCHAIN=local
+RUN ln -s "$(go env GOROOT)" /opt/milvus-go
+ENV GOROOT=/opt/milvus-go PATH=/opt/milvus-go/bin:$PATH GOTOOLCHAIN=local
 
 # Tests run offline during the audit. Do not invoke make's download targets there.
 ENV GOPROXY=off GOSUMDB=off CARGO_NET_OFFLINE=true UV_OFFLINE=1
