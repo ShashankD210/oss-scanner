@@ -33,8 +33,24 @@ RUN go mod download \
 # Milvus itself rather than rebuilding every dependency in a different profile.
 ENV CFLAGS="-g1 -fno-omit-frame-pointer" \
     CXXFLAGS="-g1 -fno-omit-frame-pointer"
-RUN make build-cpp-with-unittest mode=Release \
-    && make build-go build-pyudf-runtime-wheel PYTHON=/src/.venv/bin/python
+# Conan 2 reads tools.build:jobs; retain full logs and print bounded progress.
+RUN set -e; \
+    mkdir -p "$CONAN_HOME"; \
+    printf 'tools.build:jobs=%s\n' "$BUILD_JOBS" >> "$CONAN_HOME/global.conf"; \
+    (make build-cpp-with-unittest mode=Release \
+        && make build-go build-pyudf-runtime-wheel PYTHON=/src/.venv/bin/python) \
+        > /tmp/milvus-build.log 2>&1 & \
+    build_pid=$!; \
+    while kill -0 "$build_pid" 2>/dev/null; do \
+        tail -n 5 /tmp/milvus-build.log 2>/dev/null || true; \
+        sleep 30; \
+    done; \
+    if wait "$build_pid"; then \
+        tail -n 20 /tmp/milvus-build.log; \
+    else \
+        tail -n 200 /tmp/milvus-build.log; \
+        exit 1; \
+    fi
 
 ENV LD_LIBRARY_PATH=/src/internal/core/output/lib:/src/internal/core/output/lib64:/src/cmake_build/lib \
     PKG_CONFIG_PATH=/src/internal/core/output/lib/pkgconfig:/src/internal/core/output/lib64/pkgconfig
