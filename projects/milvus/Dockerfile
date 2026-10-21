@@ -66,6 +66,9 @@ RUN milvus-build-step /tmp/milvus-dependencies.log \
 
 FROM dependencies AS native
 
+# Keep compiler selection stable when the scanner installs additional tooling.
+ENV CC=/usr/bin/gcc-12 CXX=/usr/bin/g++-12
+
 # The prerequisites were built in the previous stage; avoid fetching them again.
 RUN milvus-build-step /tmp/milvus-native-build.log \
     make -o generated-proto -o plan-parser-lib build-cpp-with-unittest mode=Release
