@@ -33,7 +33,7 @@ RUN bun install --frozen-lockfile \
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 RUN --network=none zig build -j2 \
     && zig build tools -j2 \
-    && zig build test -j2 \
+    && zig build test -j2 --summary all \
     && zig build fmt -j2
 RUN --network=none bun test tools/oxlint \
     && bun run lint \
@@ -45,4 +45,4 @@ RUN --network=none bun test tools/oxlint \
     && python3 scripts/check-threat-model.py \
     && git ls-files -z '*.py' | xargs -0 ruff check
 RUN --network=none zig-out/bin/clanker gate \
-    && zig build e2e -j2
+    && zig build e2e -j2 --summary all
