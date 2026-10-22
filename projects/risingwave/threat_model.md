@@ -28,13 +28,21 @@ Prioritize the following attacker-controlled input and boundaries:
 The checkout is at `/src`. The Dockerfile builds `target/ci-dev/risingwave` from
 source using `rw-dynamic-link,all-connectors-lite,udf`. Rust registry/git caches
 and build outputs are retained. `CARGO_NET_OFFLINE=true` applies after setup.
-To reproduce a focused unit test without network access:
+Dependency optimization is disabled for this audit build to reduce cold-build time;
+line-table debug information, debug assertions and overflow checks are retained.
+The audit defaults to two Cargo/CMake jobs. Keep the all-in-one package selected
+when running these unit suites so Cargo reuses the binary's dependency features:
+
 
 ```sh
-cargo test --locked --offline --profile ci-dev --lib -p risingwave_sqlparser
-cargo test --locked --offline --profile ci-dev --lib -p pgwire
-cargo test --locked --offline --profile ci-dev --lib -p risingwave_connector_codec
+cargo test --locked --offline --profile ci-dev --lib \
+  -p risingwave_cmd_all -p risingwave_sqlparser -p pgwire -p risingwave_connector_codec \
+  --no-default-features \
+  --features risingwave_cmd_all/rw-dynamic-link,risingwave_cmd_all/all-connectors-lite,risingwave_cmd_all/udf
 ```
+
+Append `-- TEST_NAME` to filter for a focused test. Dropping the all-in-one
+package can change dependency features and trigger a second compilation.
 
 For SQL/protocol experiments, start a disposable in-memory instance inside the
 isolated scanner environment (use only synthetic data):

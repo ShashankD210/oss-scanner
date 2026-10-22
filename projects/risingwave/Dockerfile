@@ -34,6 +34,16 @@ ENV PATH=/root/.cargo/bin:$PATH
 COPY . /src
 WORKDIR /src
 
+# Prefer fast cold builds on the smaller enrollment CI runner. Keep line tables,
+# debug assertions and overflow checks; only dependency optimization is disabled.
+# Cargo config overrides the manifest's ci-dev dependency opt-levels (1 / 3).
+RUN printf '\n%s\n' \
+      '[profile.ci-dev.package."*"]' 'opt-level = 0' \
+      '[profile.ci-dev.package.tokio]' 'opt-level = 0' \
+      '[profile.ci-dev.package.await-tree]' 'opt-level = 0' \
+      '[profile.ci-dev.package.indextree]' 'opt-level = 0' \
+      >> /src/.cargo/config.toml
+
 # The root rust-toolchain is a symlink to ci/rust-toolchain. Follow the version
 # selected by the public checkout rather than pinning a second nightly here.
 RUN rustup set auto-self-update disable && rustup toolchain install --profile minimal \
@@ -52,10 +62,13 @@ RUN export CARGO_NET_GIT_FETCH_WITH_CLI=true GIT_TERMINAL_PROMPT=0; \
 # Skip the heavy optional LanceDB sink and frontend DataFusion feature. Connector
 # dependencies can still compile DataFusion. Lite sinks and embedded UDFs are enabled;
 # Java connector assemblies and the dashboard UI are not built (see threat model).
+# Keep the test feature graph aligned with the binary to reuse compiled dependencies.
 RUN cargo build --locked --profile ci-dev -p risingwave_cmd_all \
       --no-default-features --features rw-dynamic-link,all-connectors-lite,udf \
     && cargo test --locked --profile ci-dev --no-run --lib \
-      -p risingwave_sqlparser -p pgwire -p risingwave_connector_codec
+      -p risingwave_cmd_all -p risingwave_sqlparser -p pgwire -p risingwave_connector_codec \
+      --no-default-features \
+      --features risingwave_cmd_all/rw-dynamic-link,risingwave_cmd_all/all-connectors-lite,risingwave_cmd_all/udf
 
 # Use the small audit machine defaults after the online build is complete.
 # A successful build must leave the program runnable and the small unit suites
@@ -65,6 +78,8 @@ ENV CARGO_NET_OFFLINE=true \
     CMAKE_BUILD_PARALLEL_LEVEL=2
 RUN /src/target/ci-dev/risingwave --version \
     && cargo test --locked --offline --profile ci-dev --lib \
-      -p risingwave_sqlparser -p pgwire -p risingwave_connector_codec
+      -p risingwave_cmd_all -p risingwave_sqlparser -p pgwire -p risingwave_connector_codec \
+      --no-default-features \
+      --features risingwave_cmd_all/rw-dynamic-link,risingwave_cmd_all/all-connectors-lite,risingwave_cmd_all/udf
 
 CMD ["bash"]
