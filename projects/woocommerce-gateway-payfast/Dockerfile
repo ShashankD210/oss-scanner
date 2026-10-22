@@ -122,6 +122,7 @@ RUN wp-start \
     && wp user create --path="$WP_ROOT" customer customer@example.com --role=customer --user_pass=customer \
     && wp option update --path="$WP_ROOT" woocommerce_currency ZAR \
     && wp option update --path="$WP_ROOT" woocommerce_default_country 'ZA:WC' \
+    && wp option update --path="$WP_ROOT" woocommerce_coming_soon no \
     && wp option update --path="$WP_ROOT" woocommerce_enable_guest_checkout yes \
     && wp option update --path="$WP_ROOT" woocommerce_enable_signup_and_login_from_checkout yes \
     && wp option update --path="$WP_ROOT" woocommerce_enable_myaccount_registration yes \
