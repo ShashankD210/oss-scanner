@@ -1,0 +1,7 @@
+# baserCMS - https://basercms.net
+repo: https://github.com/baserproject/basercms#5.4.x
+primary_contact: ryuring@basercms.net
+homepage: https://basercms.net
+disabled: false
+dockerfile: .oss-scanner/Dockerfile
+threat_model: .oss-scanner/threat_model.md
