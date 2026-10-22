@@ -1,0 +1,6 @@
+# axios4go: axios-style HTTP client library for Go.
+repo: https://github.com/rezmoss/axios4go#main
+primary_contact: hi@rezmoss.com
+homepage: https://github.com/rezmoss/axios4go
+dockerfile: .oss-scanner/Dockerfile
+threat_model: .oss-scanner/threat_model.md
