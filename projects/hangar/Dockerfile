@@ -1,4 +1,5 @@
 FROM ghcr.io/astral-sh/uv:0.12.13 AS uv
+FROM node:26.10.0-bookworm-slim AS node
 FROM ubuntu:24.04
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -6,6 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       python3 python3-venv qemu-system-x86 qemu-utils shellcheck unzip xz-utils \
     && rm -rf /var/lib/apt/lists/*
 COPY --from=uv /uv /usr/local/bin/uv
+COPY --from=node /usr/local /usr/local
 RUN curl --fail --location --retry 3 \
       https://ziglang.org/download/0.16.0/zig-x86_64-linux-0.16.0.tar.xz -o /opt/zig.tar.xz \
     && echo '70e49664a74374b48b51e6f3fdfbf437f6395d42509050588bd49abe52ba3d00  /opt/zig.tar.xz' | sha256sum --check \
