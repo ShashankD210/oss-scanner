@@ -7,6 +7,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 COPY . /src
 WORKDIR /src
+# The scanner removes this context filter; the packaging gate checks its source.
+RUN git show HEAD:.dockerignore > .dockerignore
 RUN set -eux; \
     version="$(tr -d '[:space:]' < .zigversion)"; \
     digest="$(sed -n 's/^ARG ZIG_SHA256_X86_64=//p' Dockerfile)"; \
@@ -29,5 +31,12 @@ RUN python3 -m venv /opt/python \
     && uv lock --check --project tests \
     && uv lock --check --project research/kernels
 COPY --from=node /usr/local /usr/local
-RUN zig build -j2
-RUN zig build ci -j2
+RUN curl --fail --location --retry 3 \
+      https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.linux.x86_64.tar.xz \
+      -o /opt/shellcheck.tar.xz \
+    && echo "8c3be12b05d5c177a04c29e3c78ce89ac86f1595681cab149b65b97c4e227198  /opt/shellcheck.tar.xz" | sha256sum --check \
+    && tar -xJf /opt/shellcheck.tar.xz -C /opt \
+    && cp /opt/shellcheck-v0.11.0/shellcheck /usr/local/bin/shellcheck \
+    && rm /opt/shellcheck.tar.xz
+RUN --network=none zig build -j2
+RUN --network=none zig build ci -j2
