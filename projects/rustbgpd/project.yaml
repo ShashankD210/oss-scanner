@@ -1,0 +1,7 @@
+# rustbgpd: an API-first BGP daemon for route servers, route reflectors and automation, with the rbgp operator CLI.
+# It decodes BGP, RTR and BFD input from network peers and exposes a privileged gRPC control plane.
+repo: https://github.com/lance0/rustbgpd#main
+primary_contact: lance@lance0.com
+homepage: https://rbgp.rs
+dockerfile: .oss-scanner/Dockerfile
+threat_model: .oss-scanner/threat_model.md
