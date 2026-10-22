@@ -1,0 +1,5 @@
+# StarkWare's Circle STARK proving stack: stwo, stwo-cairo, stwo-circuits, proving-utils and stwo-air-infra.
+# The Dockerfile and threat_model.md sit next to this file, so neither key is set here.
+repo: https://github.com/starkware-libs/proving#main
+primary_contact: security@starkware.co
+homepage: https://starkware.co
