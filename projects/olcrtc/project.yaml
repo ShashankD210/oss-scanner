@@ -1,0 +1,16 @@
+# olcRTC: an encrypted TCP and UDP tunnel inside WebRTC calls on public meeting services, in Go.
+# The transport engine of Ghostlane (https://github.com/ghostlane-project/ghostlane).
+
+repo: https://github.com/ghostlane-project/olcrtc#proofkit
+
+primary_contact: securityghostlane@proton.me
+
+homepage: https://github.com/ghostlane-project/olcrtc
+
+disabled: false
+
+# The Dockerfile is kept here, beside this file: the engine's CI runs its live release gate (real
+# relays, most of an hour) for any change outside Markdown and docs/, and a build recipe cannot
+# change what the engine does on a relay.
+
+threat_model: .oss-scanner/threat_model.md
