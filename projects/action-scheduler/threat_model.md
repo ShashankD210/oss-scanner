@@ -139,9 +139,11 @@ this image is an older release that the version registry leaves inert; report an
 - The plugin is at `/var/www/html/wp-content/plugins/action-scheduler`, a symlink to `/src`, so a patch to `/src`
   takes effect on the next request. There is nothing to build.
 - The async runner can be exercised end to end offline: load a wp-admin page as an administrator so the `shutdown`
-  hook dispatches the loopback request (needs due pending actions and the 60-second lock free), or compute the nonce
-  for the user you claim with `wp_create_nonce( 'as_async_request_queue_runner' )` in `wp eval --user=...` and POST
-  to `/wp-admin/admin-ajax.php?action=as_async_request_queue_runner&nonce=...` with that user's cookies.
+  hook dispatches the loopback request (needs due pending actions and the 60-second lock free), or compute a nonce
+  with `wp eval 'echo wp_create_nonce( "as_async_request_queue_runner" );'` (no `--user`) and POST to
+  `/wp-admin/admin-ajax.php?action=as_async_request_queue_runner&nonce=...` without cookies. A nonce made in WP-CLI
+  has no session token, so it fails on a request that carries a logged-in user's cookies; the runner also answers
+  logged-out requests.
 - PHPUnit: `cd /src && vendor/bin/phpunit -c tests/phpunit.xml.dist --filter <TestName>`, with MariaDB running
   (`composer run test` is the same; `WP_MULTISITE=1` runs the multisite variant as CI does). Tests use the `as_tests`
   database and the WordPress copy in `/tmp/wordpress`. PHPUnit reports about 1,950 tests (data providers, and the base
