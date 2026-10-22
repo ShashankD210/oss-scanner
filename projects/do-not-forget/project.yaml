@@ -1,0 +1,7 @@
+# do-not-forget: a tray / menu bar app (Linux, macOS, Windows) that shows the next meeting from Google Calendar.
+# The Dockerfile and threat_model.md live in the project's repository under .oss-scanner/.
+repo: https://github.com/mkelcik/do-not-forget#main
+primary_contact: mkelcik@gmail.com
+homepage: https://donotforget.dev/
+dockerfile: .oss-scanner/Dockerfile
+threat_model: .oss-scanner/threat_model.md
