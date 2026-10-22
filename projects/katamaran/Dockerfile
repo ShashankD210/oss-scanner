@@ -18,4 +18,4 @@ RUN set -eux; \
     python3 -m venv /opt/python; \
     pip install --no-cache-dir yamllint==1.38.0; \
     go mod download
-RUN make check
+RUN --network=none make check
