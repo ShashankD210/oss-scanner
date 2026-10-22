@@ -133,7 +133,7 @@ bug.
   under `/var/log/apache2/`. The plugin logs through WooCommerce's logger (wp-admin > WooCommerce > Status > Logs).
 - Users: `admin` / `admin` (administrator), `shopmanager` / `shopmanager` (shop_manager), `customer` / `customer`
   (customer). Registration at checkout and on My Account is enabled. Guest checkout is enabled. For a label-only
-  user, `wp user create` one and `wp cap add <user> wcship_manage_labels`.
+  user, `wp user create` one and `wp user add-cap <user> wcship_manage_labels`.
 - `wp --path=/var/www/html ...` (WP-CLI) sets up content, options, users and orders. `wp --path=/var/www/html wc
   ...` drives the WooCommerce REST API. `wp --path=/var/www/html eval '...'` runs PHP in a loaded WordPress.
 - The plugin is at `/var/www/html/wp-content/plugins/woocommerce-services`, a symlink to `/src`, so a patch to
