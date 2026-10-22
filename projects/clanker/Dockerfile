@@ -16,6 +16,7 @@ RUN curl --fail --location --retry 3 \
       https://github.com/oven-sh/bun/releases/download/bun-v1.4.2/bun-linux-x64.zip -o /opt/bun.zip \
     && unzip -q /opt/bun.zip -d /opt \
     && mv /opt/bun-linux-x64 /opt/bun \
+    && ln -s bun /opt/bun/bunx \
     && rm /opt/bun.zip \
     && uv venv --python /usr/bin/python3 /opt/lint \
     && uv pip install --python /opt/lint/bin/python ruff==0.16.4 yamllint==1.38.0
