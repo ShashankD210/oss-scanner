@@ -1,0 +1,7 @@
+# optics-framework: open-source test automation for Android, iOS, web, TV and BLE.
+# Also exposes a local FastAPI server and an MCP server that drive devices from
+# agent and HTTP requests.
+repo: https://github.com/mozarkai/optics-framework#main
+primary_contact: lalit@mozark.ai
+homepage: https://optics-framework.org
+disabled: false
