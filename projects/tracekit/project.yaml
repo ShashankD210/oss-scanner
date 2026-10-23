@@ -1,0 +1,16 @@
+# Tracekit: tamper-evident, policy-gated records of what AI agents do. It checks each tool call an agent makes
+# before it runs, signs every call and decision into a hash chain with witnessed checkpoints, and exports one bundle
+# per run that anyone can verify offline. It is security-critical because teams rely on its records as proof of
+# what their agents did, and its policy gate decides whether an agent's action may run: a bug that lets a forged or
+# edited record verify, or a denied action run, breaks that proof. Every input it parses (hook events, SDK calls,
+# OTLP spans, model-proxy traffic, bundles handed over for verification) can come from a compromised agent.
+repo: https://github.com/Cygnux-Labs/Tracekit#main
+
+# Cygnux Labs, which maintains Tracekit.
+primary_contact: info@cygnuxlabs.com
+
+homepage: https://tracekit.tech/
+
+disabled: false
+
+# The Dockerfile and threat model sit next to this file.
